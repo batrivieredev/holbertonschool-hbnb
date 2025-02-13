@@ -1,0 +1,59 @@
+classDiagram
+    class User {
+        +UUID id
+        +String firstName
+        +String lastName
+        +String email
+        +String password
+        +Boolean isAdmin
+        +Date createdAt
+        +Date updatedAt
+        +register()
+        +updateProfile()
+        +deleteAccount()
+    }
+
+    class Place {
+        +UUID id
+        +String title
+        +String description
+        +Float price
+        +Float latitude
+        +Float longitude
+        +Date createdAt
+        +Date updatedAt
+        +User owner
+        +List~Amenity~ amenities
+        +createPlace()
+        +updatePlace()
+        +deletePlace()
+    }
+
+    class Review {
+        +UUID id
+        +Integer rating
+        +String comment
+        +Date createdAt
+        +Date updatedAt
+        +User reviewer
+        +Place place
+        +createReview()
+        +updateReview()
+        +deleteReview()
+    }
+
+    class Amenity {
+        +UUID id
+        +String name
+        +String description
+        +Date createdAt
+        +Date updatedAt
+        +createAmenity()
+        +updateAmenity()
+        +deleteAmenity()
+    }
+
+    User "1" --> "*" Place : Owns
+    User "1" --> "*" Review : Writes
+    Place "1" --> "*" Review : Has
+    Place "1" --> "*" Amenity : Includes

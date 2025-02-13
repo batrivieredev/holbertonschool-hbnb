@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant User
+    participant API
+    participant BusinessLogic
+    participant Database
+
+    User->>API: POST /places
+    API->>BusinessLogic: Validate & Process Request
+    BusinessLogic->>Database: Save Place Data
+    Database-->>BusinessLogic: Confirmation
+    BusinessLogic-->>API: Return Response
+    API-->>User: Success/Failure Response
+

@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant User
+    participant API
+    participant BusinessLogic
+    participant Database
+
+    User->>API: POST /register
+    API->>BusinessLogic: Validate & Process Request
+    BusinessLogic->>Database: Save User Data
+    Database-->>BusinessLogic: Confirmation
+    BusinessLogic-->>API: Return Response
+    API-->>User: Success/Failure Response
