@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 from app.models.BaseModel import BaseModel
 from app.models.amenity import Amenity
