@@ -2,7 +2,6 @@ from app.models.user import User
 from app.persistence.repository import InMemoryRepository
 
 
-
 class UsersFacade():
 
     def __init__(self):

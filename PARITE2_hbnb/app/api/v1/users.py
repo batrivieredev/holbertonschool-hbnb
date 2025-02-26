@@ -19,6 +19,7 @@ user_update_model = api.model('UserUpdate', {
 
 facade = UsersFacade()  # Instance unique
 
+
 @api.route('/')
 class UserList(Resource):
     @api.expect(user_model, validate=True)
@@ -45,6 +46,7 @@ class UserList(Resource):
         """Récupérer la liste des utilisateurs."""
         users = facade.get_all_users()
         return [{'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email} for user in users], 200
+
 
 @api.route('/<string:user_id>')
 class UserResource(Resource):
