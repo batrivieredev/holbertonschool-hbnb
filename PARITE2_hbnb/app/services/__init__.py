@@ -1,3 +1,3 @@
-from app.services.facade import HBnBFacade
+from app.services.UsersFacade import UsersFacade
 
-facade = HBnBFacade()
+facade = UsersFacade()
