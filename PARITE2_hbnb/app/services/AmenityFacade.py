@@ -2,7 +2,7 @@ from app.models.amenity import Amenity
 from app.persistence.repository import InMemoryRepository
 
 
-class HBnBFacade():
+class AmenityFacade():
     def __init__(self):
         self.amenity_repo = InMemoryRepository()
 
