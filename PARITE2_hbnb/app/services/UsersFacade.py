@@ -1,11 +1,12 @@
-from app.services.facade import HBnBFacade
 from app.models.user import User
+from app.persistence.repository import InMemoryRepository
 
 
-class UsersFacade(HBnBFacade):
+
+class UsersFacade():
 
     def __init__(self):
-        super().__init__()
+        self.user_repo = InMemoryRepository()
 
     def create_user(self, user_data):
         user = User(**user_data)
