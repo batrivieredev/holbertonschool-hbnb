@@ -1,8 +1,10 @@
-from app.services.facade import HBnBFacade
 from app.models.amenity import Amenity
+from app.persistence.repository import InMemoryRepository
 
 
-class AmenityFacade(HBnBFacade):
+class HBnBFacade():
+    def __init__(self):
+        self.amenity_repo = InMemoryRepository()
 
     def create_amenity(self, amenity_data):
         amenity = Amenity(**amenity_data)
@@ -16,5 +18,12 @@ class AmenityFacade(HBnBFacade):
         return self.amenity_repo.get_all()
 
     def update_amenity(self, amenity_id, amenity_data):
-        # Placeholder for logic to update an amenity
-        pass
+        amenity = self.amenity_repo.get(amenity_id)
+        if amenity:
+            for key, value in amenity_data.items():
+                setattr(amenity, key, value)
+            self.amenity_repo.update(amenity)
+        return amenity
+
+    def delete_amenity(self, amenity_id):
+        self.amenity_repo.delete(amenity_id)
