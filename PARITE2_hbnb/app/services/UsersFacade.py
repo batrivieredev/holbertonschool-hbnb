@@ -4,7 +4,7 @@ import re
 
 def is_valid_email(email):
     """Vérifie si l'email est valide avec une regex."""
-    email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]{2,}$'
     return re.match(email_regex, email) is not None
 
 class UsersFacade():
