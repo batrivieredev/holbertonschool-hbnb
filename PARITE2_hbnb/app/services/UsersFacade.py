@@ -9,9 +9,16 @@ def is_valid_email(email):
 
 class UsersFacade():
 
+    _instance = None
+
     def __init__(self):
         self.user_repo = InMemoryRepository()
 
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(UsersFacade, cls).__new__(cls)
+            cls._instance.user_repo = InMemoryRepository()  # Garde le stockage en mémoire
+        return cls._instance
 
     def create_user(self, user_data):
         email = user_data.get("email")
@@ -21,10 +28,14 @@ class UsersFacade():
 
         user = User(**user_data)
         self.user_repo.add(user)
+        print(f"✅ Debug: User created {user.id}")
         return user
 
     def get_user(self, user_id):
-        return self.user_repo.get(user_id)
+        print(f"🔍 Debug: Searching for user ID {user_id} in user_repo")
+        user = self.user_repo.get(user_id)
+        print(f"🔍 Debug: get_user({user_id}) found {user}")  # Ajout du print pour vérifier
+        return user
 
     def get_user_by_email(self, email):
         user = self.user_repo.get_by_attribute('email', email)

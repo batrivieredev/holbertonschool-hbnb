@@ -31,9 +31,12 @@ class InMemoryRepository(Repository):
         self._storage = {}
 
     def add(self, obj):
+        print(f"📝 Debug: Adding object {obj.id} to repository")
         self._storage[obj.id] = obj
 
     def get(self, obj_id):
+        print(f"🔍 Debug: Retrieving object {obj_id} from repository")
+        print(f"📦 Current storage: {self._storage}")  # Affiche tout ce qui est stocké
         return self._storage.get(obj_id)
 
     def get_all(self):
