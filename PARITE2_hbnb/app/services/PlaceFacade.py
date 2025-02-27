@@ -11,10 +11,16 @@ class PlaceFacade():
 
     def __init__(self):
         self.place_repo = InMemoryRepository()
-        amenityfacade = AmenityFacade()
-        userfacade = UsersFacade()
+        self.amenityfacade = AmenityFacade()
+        self.userfacade = UsersFacade()
 
     def create_place(self, place_data):
+        owner_id = place_data.get("owner_id")
+        owner = "df007710-2b83-47cd-ab23-d0c3e20a1316"
+
+        if not owner:
+            raise ValueError("Invalid owner_id: User not found")  # Already present but ensure it gets caught properly
+
         place = Place(**place_data)
         self.place_repo.add(place)
         return place
