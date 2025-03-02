@@ -1,10 +1,8 @@
 from flask_restx import Namespace, Resource, fields
-from app.services.ReviewFacade import RrviewFacade
-
-from flask_restx import Namespace, Resource, fields
-from app.services import facade
+from app.services.ReviewFacade import ReviewFacade
 
 api = Namespace('reviews', description='Review operations')
+facade = ReviewFacade()
 
 # Define the review model for input validation and documentation
 review_model = api.model('Review', {
@@ -22,27 +20,12 @@ class ReviewList(Resource):
     def post(self):
         """Register a new review"""
         review_data = api.payload
-        text = review_data.get('text')
-        if not text or not isinstance(text, str) or text.strip() == "":
-            return {'error': 'Text is required and must be a non-empty string'}, 400
-
-        rating = review_data.get('rating')
-        if not rating or not isinstance(rating, int) or rating < 1 or rating > 5:
-            return {'error': 'Rating must be an integer between 1 and 5'}, 400
-
-        user_id = review_data.get('user_id')
-        if not user_id or not isinstance(user_id, str) or user_id.strip() == "":
-            return {'error': 'User ID is required and must be a non-empty string'}, 400
-
-        place_id = review_data.get('place_id')
-        if not place_id or not isinstance(place_id, str) or place_id.strip() == "":
-            return {'error': 'Place ID is required and must be a non-empty string'}, 400
-
-        new_review = facade.create_review(review_data)
-        return {'id': new_review.id, 'text': new_review.text, 'rating': new_review.rating,
-                'user_id': new_review.user_id, 'place_id': new_review.place_id}, 201
-
-
+        try:
+            new_review = facade.create_review(review_data)
+            return {'id': new_review.id, 'text': new_review.text, 'rating': new_review.rating,
+                    'user_id': new_review.user_id, 'place_id': new_review.place_id}, 201
+        except ValueError as e:
+            return {'error': str(e)}, 400
 
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):
@@ -89,9 +72,6 @@ class PlaceReviewList(Resource):
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get all reviews for a specific place"""
-        place = facade.get_place(place_id)
-        if not place:
-            return {'error': 'Place not found'}, 404
-        reviews = facade.get_place_reviews(place_id)
+        reviews = facade.get_reviews_by_place(place_id)
         return [{'id': review.id, 'text': review.text, 'rating': review.rating,
                  'user_id': review.user_id, 'place_id': review.place_id} for review in reviews], 200

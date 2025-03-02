@@ -1,0 +1,18 @@
+Résumé des modifications apportées :
+
+1. Correction de ReviewFacade.py :
+   - Fix de update_review() pour passer l'ID et les données mises à jour à self.review_repo.update(review.id, review_data).
+   - Ajout de validation pour user_id, place_id, et rating.
+
+2. Correction de reviews.py :
+   - Correction de l'import (ReviewFacade au lieu de RrviewFacade).
+   - Suppression de la référence incorrecte facade.get_place_reviews(place_id).
+   - Ajout de gestion d'erreurs dans post().
+   - Correction de get() pour récupérer les reviews d'un lieu via facade.get_reviews_by_place(place_id).
+
+3. Correction de __init__.py :
+   - Ajout du namespace reviews dans l’API (api.add_namespace(reviews_ns, path='/api/v1/reviews')).
+
+4. Ajout du fichier test_reviews_api.py :
+   - Création de tests unitaires couvrant POST, GET, PUT, DELETE.
+   - Ajout d'un test pour vérifier la gestion d’une review inexistante (GET /reviews/nonexistent-id).
