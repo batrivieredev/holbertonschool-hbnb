@@ -10,7 +10,7 @@ userfacade = UsersFacade()
 class PlaceFacade:
 
     def __init__(self):
-        self.place_repo = SQLAlchemyRepository()
+        self.place_repo = SQLAlchemyRepository(Place)
         self.amenityfacade = AmenityFacade()  # Correctement assigné comme attribut de classe
         self.userfacade = UsersFacade()  # Correctement assigné comme attribut de classe
 

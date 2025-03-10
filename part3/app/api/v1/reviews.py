@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from app.services.ReviewFacade import RrviewFacade
+from app.services.ReviewFacade import ReviewFacade
 
 from flask_restx import Namespace, Resource, fields
 from app.services import facade

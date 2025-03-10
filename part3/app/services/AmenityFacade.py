@@ -3,7 +3,7 @@ from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 
 class AmenityFacade():
     def __init__(self):
-        self.amenity_repo = SQLAlchemyRepository()
+        self.amenity_repo = SQLAlchemyRepository(Amenity)
 
     def create_amenity(self, amenity_data):
         """Créer une nouvelle amenity."""

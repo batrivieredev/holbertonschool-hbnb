@@ -1,27 +1,20 @@
 #!/usr/bin/python3
 
+from app.extensions import db
 from app.models.BaseModel import BaseModel
-from app.models.amenity import Amenity
-from app.models.review import Review
 
 class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner):
-        super().__init__()
-        self.title = title[:100]  # Max length 100
-        self.description = description
-        self.price = max(price, 0.0)  # Ensure price is positive
-        self.latitude = max(min(latitude, 90.0), -90.0)  # Validate range
-        self.longitude = max(min(longitude, 180.0), -180.0)  # Validate range
-        self.owner = owner  # Expecting a User instance
-        self.reviews = []  # Store related reviews
-        self.amenities = []  # Store related amenities
+    __tablename__ = 'places'  # ✅ Define table name
 
-# In case we want to add a review to a place, we can use the add_review method.
-    def add_review(self, review):
-        if isinstance(review, Review):
-            self.reviews.append(review)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    price = db.Column(db.Float, nullable=False, default=0.0)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)  # ✅ Foreign key reference
 
-# In case we want to add an amenity to a place, we can use the add_amenity method.
-    def add_amenity(self, amenity):
-        if isinstance(amenity, Amenity):
-            self.amenities.append(amenity)
+    owner = db.relationship('User', backref='places', lazy=True)  # ✅ Define relationship
+
+    def __repr__(self):
+        return f"<Place {self.title}>"
+

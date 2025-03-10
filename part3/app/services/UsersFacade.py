@@ -10,7 +10,7 @@ def is_valid_email(email):
 class UsersFacade():
 
     def __init__(self):
-        self.user_repo = SQLAlchemyRepository()
+        self.user_repo = SQLAlchemyRepository(User)
 
 
     def create_user(self, user_data):

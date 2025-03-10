@@ -4,7 +4,7 @@ from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 
 class ReviewFacade:
     def __init__(self):
-        self.review_repo = SQLAlchemyRepository()
+        self.review_repo = SQLAlchemyRepository(Review)
 
 
 def create_review(self, review_data):

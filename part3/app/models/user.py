@@ -1,11 +1,15 @@
 #!/usr/bin/python3
 
+from app.extensions import db
 from app.models.BaseModel import BaseModel
 
 class User(BaseModel):
-    def __init__(self, first_name, last_name, email, is_admin=False):
-        super().__init__()
-        self.first_name = first_name[:50]  # Limit max length
-        self.last_name = last_name[:50]  # Limit max length
-        self.email = email  # Validate email externally
-        self.is_admin = is_admin
+    __tablename__ = 'users'  # ✅ Define table name
+
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+
+    def __repr__(self):
+        return f"<User {self.first_name} {self.last_name}>"
