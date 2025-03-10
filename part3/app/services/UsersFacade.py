@@ -1,5 +1,5 @@
 from app.models.user import User
-from app.persistence.repository import InMemoryRepository
+from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 import re
 
 def is_valid_email(email):
@@ -10,7 +10,7 @@ def is_valid_email(email):
 class UsersFacade():
 
     def __init__(self):
-        self.user_repo = InMemoryRepository()
+        self.user_repo = SQLAlchemyRepository()
 
 
     def create_user(self, user_data):

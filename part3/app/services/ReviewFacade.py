@@ -1,10 +1,10 @@
 from app.models.review import Review
-from app.persistence.repository import InMemoryRepository
+from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 
 
 class ReviewFacade:
     def __init__(self):
-        self.review_repo = InMemoryRepository()
+        self.review_repo = SQLAlchemyRepository()
 
 
 def create_review(self, review_data):

@@ -1,5 +1,5 @@
 from app.models.place import Place
-from app.persistence.repository import InMemoryRepository
+from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 from app.services.AmenityFacade import AmenityFacade
 from app.services.UsersFacade import UsersFacade
 
@@ -10,7 +10,7 @@ userfacade = UsersFacade()
 class PlaceFacade:
 
     def __init__(self):
-        self.place_repo = InMemoryRepository()
+        self.place_repo = SQLAlchemyRepository()
         self.amenityfacade = AmenityFacade()  # Correctement assigné comme attribut de classe
         self.userfacade = UsersFacade()  # Correctement assigné comme attribut de classe
 

@@ -1,9 +1,9 @@
 from app.models.amenity import Amenity
-from app.persistence.repository import InMemoryRepository
+from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 
 class AmenityFacade():
     def __init__(self):
-        self.amenity_repo = InMemoryRepository()
+        self.amenity_repo = SQLAlchemyRepository()
 
     def create_amenity(self, amenity_data):
         """Créer une nouvelle amenity."""
