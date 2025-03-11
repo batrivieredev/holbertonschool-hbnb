@@ -1,3 +1,14 @@
+"""
+Module gérant l'API des avis.
+Implémente les endpoints REST pour la gestion des avis utilisateurs.
+
+Fonctionnalités:
+    - Création/modification/suppression d'avis
+    - Notation des lieux (1-5 étoiles)
+    - Filtrage par lieu/utilisateur
+    - Pagination des résultats
+"""
+
 from flask_restx import Namespace, Resource, fields
 from app.services.ReviewFacade import ReviewFacade
 
@@ -8,10 +19,20 @@ api = Namespace('reviews', description='Review operations')
 
 # Define the review model for input validation and documentation
 review_model = api.model('Review', {
-    'text': fields.String(required=True, description='Text of the review'),
-    'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
-    'user_id': fields.String(required=True, description='ID of the user'),
-    'place_id': fields.String(required=True, description='ID of the place')
+    'text': fields.String(
+        required=True,
+        description='Contenu de l\'avis',
+        example="Excellent séjour, très bon accueil"
+    ),
+    'rating': fields.Integer(
+        required=True,
+        description='Note sur 5',
+        min=1,
+        max=5,
+        example=4
+    ),
+    'user_id': fields.String(description='ID de l\'auteur'),
+    'place_id': fields.String(description='ID du lieu concerné')
 })
 
 @api.route('/')

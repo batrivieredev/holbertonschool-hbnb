@@ -4,7 +4,34 @@ from app.extensions import db
 from app.models.BaseModel import BaseModel
 from flask_bcrypt import generate_password_hash, check_password_hash
 
+"""
+Modèle SQLAlchemy pour les utilisateurs.
+Définit la structure de données et les méthodes des comptes.
+
+Table: users
+Relations:
+    - places: Lieux possédés par l'utilisateur
+    - reviews: Avis postés par l'utilisateur
+"""
+
 class User(BaseModel):
+    """Représente un utilisateur dans la base de données.
+
+    Attributs:
+        first_name (str): Prénom
+        last_name (str): Nom
+        email (str): Email unique
+        password (str): Mot de passe haché
+        is_admin (bool): Statut administrateur
+
+    Relations:
+        places: Liste des lieux possédés
+        reviews: Liste des avis postés
+
+    Méthodes:
+        hash_password: Hache un mot de passe
+        verify_password: Vérifie un mot de passe
+    """
     __tablename__ = 'users'  # ✅ Define table name
 
     first_name = db.Column(db.String(50), nullable=False)

@@ -1,9 +1,35 @@
 #!/usr/bin/python3
 
+"""
+Modèle SQLAlchemy pour les avis utilisateurs.
+Gère les évaluations et commentaires sur les lieux.
+
+Relations:
+    - User: Auteur de l'avis
+    - Place: Lieu concerné par l'avis
+
+Contraintes:
+    - Note entre 1 et 5
+    - Texte obligatoire
+    - Un seul avis par utilisateur par lieu
+"""
+
 from app.extensions import db
 from app.models.BaseModel import BaseModel
 
 class Review(BaseModel):
+    """Représente un avis dans la base de données.
+
+    Attributes:
+        text (Text): Contenu de l'avis
+        rating (int): Note sur 5
+        user_id (str): Référence vers l'auteur
+        place_id (str): Référence vers le lieu
+
+    Relations:
+        user: Auteur de l'avis
+        place: Lieu évalué
+    """
     __tablename__ = 'reviews'  # ✅ Define table name
 
     place_id = db.Column(db.String(36), db.ForeignKey('places.id'), nullable=False)

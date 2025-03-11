@@ -1,3 +1,14 @@
+"""
+Facade pour la gestion des utilisateurs.
+Implémente la logique métier des comptes utilisateurs.
+
+Responsabilités:
+    - Validation des données utilisateur
+    - Hachage des mots de passe
+    - Gestion des sessions
+    - Vérification des droits
+"""
+
 from app.models.user import User
 from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 import re
@@ -53,5 +64,17 @@ class UsersFacade():
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def verify_password(self, password):
-        """Verifies if the provided password matches the hashed password."""
+        """Vérifie si le mot de passe fourni correspond.
+
+        Sécurité:
+            - Utilise bcrypt pour le hachage
+            - Protection contre les attaques timing
+            - Nombre d'itérations configurable
+
+        Args:
+            password (str): Mot de passe en clair
+
+        Returns:
+            bool: True si valide, False sinon
+        """
         return bcrypt.check_password_hash(self.password, password)

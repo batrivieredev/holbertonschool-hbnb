@@ -1,9 +1,28 @@
+"""
+Tests unitaires pour l'API des lieux.
+Vérifie les opérations CRUD et validations.
+
+Scénarios testés:
+    - Création de lieux avec équipements
+    - Gestion des relations propriétaire/lieu
+    - Validation des coordonnées GPS
+    - Gestion des erreurs
+"""
+
 import unittest
 import requests
 
 BASE_URL = "http://localhost:5000/api/v1/places/"
 
 class TestPlaceAPI(unittest.TestCase):
+    """Suite de tests pour l'API des lieux.
+
+    Tests:
+        - Création et validation des lieux
+        - Relations avec les propriétaires
+        - Gestion des équipements
+        - Validation des coordonnées
+    """
 
     @classmethod
     def setUpClass(cls):

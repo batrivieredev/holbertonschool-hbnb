@@ -1,3 +1,14 @@
+"""
+Module gérant l'API des lieux.
+Permet la gestion complète des locations et hébergements.
+
+Fonctionnalités:
+    - Création/modification de lieux
+    - Association avec les équipements
+    - Gestion des avis et notes
+    - Recherche géolocalisée
+"""
+
 from flask_restx import Namespace, Resource, fields
 from app.services.PlaceFacade import PlaceFacade
 
@@ -20,14 +31,13 @@ facade = PlaceFacade()
 
 # Define the place model for input validation and documentation
 place_model = api.model('Place', {
-    'title': fields.String(required=True, description='Title of the place'),
-    'description': fields.String(description='Description of the place'),
-    'price': fields.Float(required=True, description='Price per night'),
-    'latitude': fields.Float(required=True, description='Latitude of the place'),
-    'longitude': fields.Float(required=True, description='Longitude of the place'),
-    'owner_id': fields.String(required=True, description='ID of the owner'),
-    'amenities': fields.List(fields.String, required=True, description="List of amenities ID's"),
-    'review': fields.List(fields.String, description="List of reviews on the place")
+    'title': fields.String(required=True, description='Titre de l\'annonce', example="Appartement centre-ville"),
+    'description': fields.String(description='Description détaillée'),
+    'price': fields.Float(required=True, description='Prix par nuit', example=100.0),
+    'latitude': fields.Float(required=True, description='Latitude GPS', example=48.8566),
+    'longitude': fields.Float(required=True, description='Longitude GPS', example=2.3522),
+    'owner_id': fields.String(required=True, description='ID du propriétaire'),
+    'amenities': fields.List(fields.String, description='Liste des IDs des équipements')
 })
 
 @api.route('/')

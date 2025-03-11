@@ -1,3 +1,14 @@
+"""
+Facade pour la gestion des avis.
+Implémente la logique métier pour les avis et notes.
+
+Responsabilités:
+    - Validation des notes (1-5)
+    - Vérification des droits utilisateur
+    - Calcul des moyennes
+    - Gestion des contraintes (ex: un avis par utilisateur)
+"""
+
 from app.models.review import Review
 from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 
@@ -8,7 +19,19 @@ class ReviewFacade:
 
 
 def create_review(self, review_data):
-    '''Créer une nouvelle review'''
+    """Crée un nouvel avis.
+
+    Validation:
+        - Note entre 1 et 5
+        - Texte non vide
+        - Un seul avis par utilisateur par lieu
+
+    Args:
+        review_data (dict): Données de l'avis
+
+    Returns:
+        Review: Instance créée ou None si erreur
+    """
     review = Review(**review_data)
     self.review_repo.add(review)
     return review

@@ -1,9 +1,28 @@
+"""
+Tests unitaires pour l'API des utilisateurs.
+Vérifie l'authentification et la gestion des comptes.
+
+Aspects testés:
+    - Création et validation des comptes
+    - Hachage des mots de passe
+    - Unicité des emails
+    - Gestion des sessions
+"""
+
 import unittest
 import requests
 
 BASE_URL = "http://localhost:5000/api/v1/users/"
 
 class TestUsersAPI(unittest.TestCase):
+    """Suite de tests pour l'API des utilisateurs.
+
+    Vérifications:
+        - Création sécurisée des comptes
+        - Protection des mots de passe
+        - Validation des données
+        - Gestion des doublons
+    """
 
     @classmethod
     def setUpClass(cls):

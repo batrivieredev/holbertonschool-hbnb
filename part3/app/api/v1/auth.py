@@ -1,3 +1,14 @@
+"""
+Module d'authentification de l'API.
+Gère les tokens JWT et la sécurité des routes.
+
+Fonctionnalités:
+    - Login/Logout des utilisateurs
+    - Génération de tokens JWT
+    - Rafraîchissement des tokens
+    - Protection des routes
+"""
+
 from flask import request
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import create_access_token
@@ -14,6 +25,13 @@ login_model = api.model('Login', {
 
 @api.route('/login')
 class Login(Resource):
+    """Gère l'authentification des utilisateurs.
+
+    Sécurité:
+        - Validation des identifiants
+        - Génération de token JWT
+        - Durée de vie configurable
+    """
     @api.expect(login_model)
     def post(self):
         """Authentification de l’utilisateur et génération du JWT token"""

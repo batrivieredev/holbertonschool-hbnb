@@ -2,14 +2,25 @@
 from flask_restx import Namespace, Resource, fields
 from app.services.UsersFacade import UsersFacade, is_valid_email
 
+"""
+Module gérant l'API des utilisateurs.
+Implémente les endpoints REST pour la gestion des comptes utilisateurs.
+
+Routes:
+    POST /users/ : Création d'un compte
+    GET /users/ : Liste tous les utilisateurs
+    GET /users/<id> : Détails d'un utilisateur
+    PUT /users/<id> : Mise à jour d'un profil
+"""
+
 api = Namespace('users', description='User operations')
 
 # Modèles pour validation des données
 user_model = api.model('User', {
-    'first_name': fields.String(required=True, description='First name of the user'),
-    'last_name': fields.String(required=True, description='Last name of the user'),
-    'email': fields.String(required=True, description='Email of the user'),
-    'password': fields.String(required=True, description='Password of the user')
+    'first_name': fields.String(required=True, description='Prénom de l\'utilisateur', example="John"),
+    'last_name': fields.String(required=True, description='Nom de l\'utilisateur', example="Doe"),
+    'email': fields.String(required=True, description='Email unique', example="john.doe@example.com"),
+    'password': fields.String(required=True, description='Mot de passe (sera haché)', example="password123")
 })
 
 user_update_model = api.model('UserUpdate', {

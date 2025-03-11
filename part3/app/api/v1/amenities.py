@@ -1,12 +1,26 @@
+"""Module gérant l'API des équipements (amenities) pour l'application HBnB.
+Implémente les endpoints REST pour CRUD sur les équipements.
+
+Routes:
+    GET /amenities/ : Liste tous les équipements
+    POST /amenities/ : Crée un nouvel équipement
+    GET /amenities/<id> : Récupère un équipement spécifique
+    PUT /amenities/<id> : Met à jour un équipement
+"""
+
 from flask_restx import Namespace, Resource, fields
 from app.services.AmenityFacade import AmenityFacade
 
 
 api = Namespace('amenities', description='Amenity operations')
 
-# Define the amenity model for input validation and documentation
+# Documentation Swagger améliorée
 amenity_model = api.model('Amenity', {
-    'name': fields.String(required=True, description='Name of the amenity')
+    'name': fields.String(
+        required=True,
+        description='Nom unique de l équipement (ex: "WiFi", "Parking")',
+        example="WiFi"
+    )
 })
 
 facade = AmenityFacade()
@@ -14,10 +28,16 @@ facade = AmenityFacade()
 
 @api.route('/')
 class AmenityList(Resource):
+    """Gestion des opérations sur la collection d'équipements."""
 
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
-        """Get all amenities"""
+        """Récupère tous les équipements.
+
+        Returns:
+            list: Liste des équipements au format JSON
+            int: Code HTTP 200 en cas de succès
+        """
         amenities = facade.get_all_amenities()
 
         # Si aucune amenity, renvoie une liste vide avec un status 200
@@ -27,7 +47,16 @@ class AmenityList(Resource):
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Invalid input data')
     def post(self):
-        """Register a new amenity"""
+        """Crée un nouvel équipement.
+
+        Validation:
+            - Le nom ne doit pas être vide
+            - Le nom doit être unique
+
+        Returns:
+            dict: Données de l'équipement créé
+            int: Code HTTP 201 en cas de succès, 400 si données invalides
+        """
         amenity_data = api.payload
         name = amenity_data.get('name')
 
@@ -45,6 +74,8 @@ class AmenityList(Resource):
 
 @api.route('/<amenity_id>')
 class AmenityResource(Resource):
+    """Gestion des opérations sur un équipement spécifique."""
+
     @api.response(200, 'Amenity details retrieved successfully')
     @api.response(404, 'Amenity not found')
     def get(self, amenity_id):

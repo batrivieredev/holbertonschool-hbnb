@@ -1,6 +1,22 @@
+"""
+Interface et implémentation du pattern Repository.
+Fournit une abstraction de la couche de persistance.
+
+Patterns:
+    - Repository Pattern
+    - Interface Segregation
+    - Dependency Inversion
+"""
+
 from abc import ABC, abstractmethod
 
 class Repository(ABC):
+    """Interface abstraite définissant les opérations de persistance.
+
+    Cette interface assure une séparation entre la logique métier
+    et la couche de persistance, permettant de changer facilement
+    d'implémentation (SQL, NoSQL, fichiers, etc.)
+    """
     @abstractmethod
     def add(self, obj):
         pass
@@ -27,6 +43,11 @@ class Repository(ABC):
 
 
 class InMemoryRepository(Repository):
+    """Implémentation en mémoire pour les tests.
+
+    Stocke les données dans un dictionnaire en mémoire.
+    Utile pour les tests unitaires et le développement.
+    """
     def __init__(self):
         self._storage = {}
 

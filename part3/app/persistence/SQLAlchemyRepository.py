@@ -1,9 +1,28 @@
+"""
+Implémentation SQLAlchemy du Repository Pattern.
+Gère la persistance des données dans une base SQL.
+
+Fonctionnalités:
+    - CRUD operations
+    - Gestion des transactions
+    - Requêtes optimisées
+"""
+
 from app.extensions import db  # ✅ Import db correctly
 from app.models import User, Place, Review, Amenity  # Import models
 from app.persistence.repository import Repository  # ✅ Ensure correct module path
 
 
 class SQLAlchemyRepository(Repository):
+    """Implémentation SQLAlchemy du pattern Repository.
+
+    Cette classe encapsule toute la logique d'accès aux données
+    via SQLAlchemy, permettant de changer facilement de base
+    de données sans impacter le reste du code.
+
+    Args:
+        model: Classe du modèle SQLAlchemy à gérer
+    """
     def __init__(self, model):
         self.model = model
 

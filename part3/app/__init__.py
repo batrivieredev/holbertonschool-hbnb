@@ -1,3 +1,14 @@
+"""
+Point d'entrée principal de l'application Flask.
+Configure et initialise l'application avec ses extensions.
+
+Extensions:
+    - Flask-RESTx: API REST
+    - Flask-SQLAlchemy: ORM
+    - Flask-JWT: Authentification
+    - Flask-Bcrypt: Hachage
+"""
+
 from flask import Flask
 from flask_restx import Api
 from flask_jwt_extended import JWTManager  # ✅ Import du gestionnaire JWT
@@ -15,6 +26,16 @@ jwt = JWTManager()
 bcrypt = Bcrypt()
 
 def create_app(config_class="config.DevelopmentConfig"):
+    """Crée et configure l'instance de l'application Flask.
+
+    Args:
+        config_class (str): Classe de configuration à utiliser
+
+    Configuration:
+        - Base de données SQLite
+        - JWT pour l'authentification
+        - Documentation Swagger
+    """
     app = Flask(__name__)
 
     # Configuration de l'application

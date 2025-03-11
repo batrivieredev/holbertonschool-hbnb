@@ -3,7 +3,25 @@ import requests
 
 BASE_URL = "http://localhost:5000/api/v1/amenities/"
 
+"""
+Tests unitaires pour l'API des équipements.
+Vérifie le bon fonctionnement des endpoints CRUD.
+
+Fonctionnalités testées:
+    - Création d'équipements
+    - Mise à jour des données
+    - Récupération des détails
+    - Validation des entrées
+"""
+
 class TestAmenitiesAPI(unittest.TestCase):
+    """Suite de tests pour l'API des équipements.
+
+    Configuration:
+        - Crée un équipement de test avant les tests
+        - Nettoie les données après les tests
+        - Vérifie les codes HTTP et formats de réponse
+    """
 
     @classmethod
     def setUpClass(cls):
