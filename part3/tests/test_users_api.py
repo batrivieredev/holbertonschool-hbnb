@@ -7,11 +7,12 @@ class TestUsersAPI(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Créer un utilisateur une seule fois pour tous les tests."""
+        """Créer un utilisateur de test pour tous les tests."""
         cls.test_user = {
             "first_name": "John",
             "last_name": "Doe",
-            "email": "john.doe@example.com"
+            "email": "john.doe@example.com",
+            "password": "securepassword123"
         }
         cls.updated_user = {
             "first_name": "Johnny",
@@ -19,6 +20,7 @@ class TestUsersAPI(unittest.TestCase):
             "email": "johnny.d@example.com"
         }
 
+        # Créer un utilisateur de test
         response = requests.post(BASE_URL, json=cls.test_user)
         if response.status_code == 201:
             cls.user_id = response.json().get("id")
@@ -28,7 +30,7 @@ class TestUsersAPI(unittest.TestCase):
     def test_1_create_duplicate_user(self):
         """Test de création d'un utilisateur avec un email déjà existant."""
         response = requests.post(BASE_URL, json=self.test_user)
-        self.assertEqual(response.status_code, 400)  # Doit renvoyer une erreur
+        self.assertEqual(response.status_code, 400)  # ✅ Doit renvoyer une erreur
 
     def test_2_get_user_by_id(self):
         """Test de récupération d'un utilisateur par ID."""
@@ -70,6 +72,30 @@ class TestUsersAPI(unittest.TestCase):
         """Test de mise à jour d'un utilisateur inexistant."""
         response = requests.put(f"{BASE_URL}nonexistent-id", json=self.updated_user)
         self.assertEqual(response.status_code, 404)
+
+    def test_8_password_is_hashed(self):
+        """Test pour vérifier que le mot de passe stocké est bien haché."""
+        if not self.user_id:
+            self.skipTest("L'utilisateur n'a pas été créé")
+
+        response = requests.get(f"{BASE_URL}{self.user_id}")
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertNotEqual(data.get("password", ""), self.test_user["password"])  # ✅ Vérification du hachage
+
+    def test_9_password_not_returned_in_response(self):
+        """Test pour s'assurer que le mot de passe n'est pas retourné après la création."""
+        response = requests.post(BASE_URL, json={
+            "first_name": "Alice",
+            "last_name": "Wonderland",
+            "email": "alice@example.com",
+            "password": "mypassword"
+        })
+        self.assertEqual(response.status_code, 201)
+
+        data = response.json()
+        self.assertNotIn("password", data)  # ✅ Vérification que le mot de passe n'est pas retourné
 
 if __name__ == "__main__":
     unittest.main()

@@ -8,9 +8,11 @@ from app.api.v1.places import api as places_ns
 from app.api.v1.reviews import api as reviews_ns
 from app.api.v1.auth import api as auth_ns  # ✅ Import du namespace d'authentification
 from config import DevelopmentConfig
+from flask_bcrypt import Bcrypt
 
 # Initialisation du gestionnaire JWT
 jwt = JWTManager()
+bcrypt = Bcrypt()
 
 def create_app(config_class="config.DevelopmentConfig"):
     app = Flask(__name__)
@@ -24,6 +26,7 @@ def create_app(config_class="config.DevelopmentConfig"):
     # Initialisation des extensions
     db.init_app(app)
     jwt.init_app(app)  # ✅ Initialisation de JWTManager
+    bcrypt.init_app(app)
 
     # Initialisation de l'API
     api = Api(app, version='1.0', title='HBnB API',

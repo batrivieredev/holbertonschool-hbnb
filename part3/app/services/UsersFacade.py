@@ -1,6 +1,9 @@
 from app.models.user import User
 from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 import re
+from flask_bcrypt import Bcrypt
+
+bcrypt = Bcrypt()
 
 def is_valid_email(email):
     """Vérifie si l'email est valide avec une regex."""
@@ -44,3 +47,11 @@ class UsersFacade():
 
     def delete_user(self, user_id):
         return self.user_repo.delete(user_id)
+
+    def hash_password(self, password):
+        """Hashes the password before storing it."""
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    def verify_password(self, password):
+        """Verifies if the provided password matches the hashed password."""
+        return bcrypt.check_password_hash(self.password, password)
