@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import create_access_token, create_refresh_token
 from app.services.UsersFacade import UsersFacade, is_valid_email
 
 """
@@ -17,8 +18,8 @@ api = Namespace('users', description='User operations')
 
 # Modèles pour validation des données
 user_model = api.model('User', {
-    'first_name': fields.String(required=True, description='Prénom de l\'utilisateur', example="John"),
-    'last_name': fields.String(required=True, description='Nom de l\'utilisateur', example="Doe"),
+    'first_name': fields.String(required=True, description='Prénom de l’utilisateur', example="John"),
+    'last_name': fields.String(required=True, description='Nom de l’utilisateur', example="Doe"),
     'email': fields.String(required=True, description='Email unique', example="john.doe@example.com"),
     'password': fields.String(required=True, description='Mot de passe (sera haché)', example="password123")
 })
@@ -39,34 +40,44 @@ class UserList(Resource):
     @api.response(400, 'Invalid email format')
     @api.response(400, 'Email already registered')
     def post(self):
-        """Créer un nouvel utilisateur."""
+        """Créer un nouvel utilisateur et générer un JWT."""
         user_data = api.payload
+        print("📌 Données reçues par l'API:", user_data)  # ✅ Debug
 
         email = user_data.get('email')
         if not email or not is_valid_email(email):
+            print("❌ Email invalide:", email)  # ✅ Debug
             return {'error': 'Invalid email format'}, 400
 
         existing_user = facade.get_user_by_email(email)
         if existing_user:
+            print("❌ Email déjà utilisé:", email)  # ✅ Debug
             return {'error': 'Email already registered'}, 400
 
         password = user_data.get('password')
         if not password:
+            print("❌ Mot de passe manquant!")  # ✅ Debug
             return {'error': 'Password is required'}, 400
 
-        hashed_password = facade.hash_password(password)
-        user_data['password'] = hashed_password
+        user_data['password'] = facade.hash_password(password)
+        print("✅ Mot de passe haché:", user_data['password'])  # ✅ Debug
 
         new_user = facade.create_user(user_data)
         if not new_user:
+            print("❌ Erreur lors de la création de l'utilisateur.")  # ✅ Debug
             return {'error': 'Invalid user data'}, 400
+
+        access_token = create_access_token(identity={'id': new_user.id, 'is_admin': new_user.is_admin})
+        refresh_token = create_refresh_token(identity={'id': new_user.id, 'is_admin': new_user.is_admin})
 
         return {
             'id': new_user.id,
             'first_name': new_user.first_name,
             'last_name': new_user.last_name,
-            'email': new_user.email
-        }, 201
+            'email': new_user.email,
+            'access_token': access_token,
+            'refresh_token': refresh_token
+        }, 201  # ✅ Doit retourner `201 Created`
 
     @api.response(200, 'List of users retrieved successfully')
     def get(self):

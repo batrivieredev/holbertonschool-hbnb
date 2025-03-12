@@ -26,15 +26,24 @@ class UsersFacade():
     def __init__(self):
         self.user_repo = SQLAlchemyRepository(User)
 
-
     def create_user(self, user_data):
         email = user_data.get("email")
+        password = user_data.get("password")
 
         if not is_valid_email(email):
+            print("❌ Email invalide:", email)  # ✅ Debug email
             return None  # Rejette l'email invalide
+
+        if not password:
+            print("❌ Mot de passe manquant!")  # ✅ Debug password
+            return None
+
+        user_data["password"] = self.hash_password(password)
+        print("✅ Création utilisateur avec email:", email)  # ✅ Debug utilisateur
 
         user = User(**user_data)
         self.user_repo.add(user)
+        print(f"✅ Utilisateur {email} créé en base")
         return user
 
     def get_user(self, user_id):
@@ -60,10 +69,10 @@ class UsersFacade():
         return self.user_repo.delete(user_id)
 
     def hash_password(self, password):
-        """Hashes the password before storing it."""
-        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+        """Hache et retourne le mot de passe."""
+        return bcrypt.generate_password_hash(password).decode('utf-8')  # ✅ Retourne la valeur hachée
 
-    def verify_password(self, password):
+    def verify_password(self, user, password):
         """Vérifie si le mot de passe fourni correspond.
 
         Sécurité:
@@ -72,9 +81,10 @@ class UsersFacade():
             - Nombre d'itérations configurable
 
         Args:
+            user (User): Utilisateur dont on vérifie le mot de passe
             password (str): Mot de passe en clair
 
         Returns:
             bool: True si valide, False sinon
         """
-        return bcrypt.check_password_hash(self.password, password)
+        return bcrypt.check_password_hash(user.password, password)  # ✅ Vérifie le hash du bon utilisateur

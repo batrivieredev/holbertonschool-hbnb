@@ -11,6 +11,12 @@ Options:
 """
 
 from app import create_app
+from setup_db import reset_database, clean_database
+
+
+reset_database()
+
+clean_database()
 
 app = create_app()
 
