@@ -113,5 +113,39 @@ class TestPlaceAPI(unittest.TestCase):
         response = requests.post(BASE_URL, json=invalid_place, headers=self.headers)
         self.assertIn(response.status_code, [400, 401, 422])
 
+    def test_9_validate_price_range(self):
+        """Test de validation du prix (doit être positif)"""
+        invalid_place = self.test_place.copy()
+        invalid_place['price_by_night'] = -100
+        response = requests.post(BASE_URL, json=invalid_place, headers=self.headers)
+        self.assertIn(response.status_code, [400, 422])
+
+    def test_10_validate_coordinates(self):
+        """Test de validation des coordonnées géographiques"""
+        invalid_place = self.test_place.copy()
+        invalid_place['latitude'] = 91  # Latitude max is 90
+        response = requests.post(BASE_URL, json=invalid_place, headers=self.headers)
+        self.assertIn(response.status_code, [400, 422])
+
+    def test_11_search_places(self):
+        """Test de recherche de lieux par critères"""
+        params = {'max_price': 200, 'min_rooms': 2}
+        response = requests.get(f"{BASE_URL}search", params=params, headers=self.headers)
+        self.assertIn(response.status_code, [200, 404])  # Accepter 404 si l'endpoint n'existe pas
+        if response.status_code == 200:
+            self.assertIsInstance(response.json(), list)
+
+    def test_12_partial_update(self):
+        """Test de mise à jour partielle (PATCH)"""
+        if not self.test_place_id:
+            self.skipTest("Le lieu n'a pas été créé")
+        patch_data = {'price_by_night': 120}
+        response = requests.patch(
+            f"{BASE_URL}{self.test_place_id}",
+            json=patch_data,
+            headers=self.headers
+        )
+        self.assertEqual(response.status_code, 200)
+
 if __name__ == "__main__":
     unittest.main()

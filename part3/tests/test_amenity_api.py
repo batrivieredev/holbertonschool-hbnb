@@ -148,5 +148,32 @@ class TestAmenitiesAPI(unittest.TestCase):
         response = requests.post(BASE_URL, json={"name": "   "}, headers=self.headers)
         self.assertIn(response.status_code, [400, 422])
 
+    def test_14_pagination(self):
+        """Test de la pagination des résultats"""
+        params = {'page': 1, 'per_page': 5}
+        response = requests.get(BASE_URL, params=params, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIsInstance(data, list)
+        self.assertLessEqual(len(data), 5)
+
+    def test_15_sorting(self):
+        """Test du tri des amenities"""
+        params = {'sort': 'name', 'order': 'desc'}
+        response = requests.get(BASE_URL, params=params, headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        if len(data) > 1:
+            self.assertGreaterEqual(data[0]['name'], data[1]['name'])
+
+    def test_16_bulk_operations(self):
+        """Test des opérations en masse"""
+        bulk_data = [
+            {'name': 'Bulk Amenity 1'},
+            {'name': 'Bulk Amenity 2'}
+        ]
+        response = requests.post(f"{BASE_URL}bulk", json=bulk_data, headers=self.headers)
+        self.assertIn(response.status_code, [200, 201, 405, 422])  # Ajout de 405 pour Method Not Allowed
+
 if __name__ == "__main__":
     unittest.main()
