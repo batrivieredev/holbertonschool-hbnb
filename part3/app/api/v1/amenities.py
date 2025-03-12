@@ -11,7 +11,9 @@ Routes:
 from flask_restx import Namespace, Resource, fields
 from app.services.AmenityFacade import AmenityFacade
 from app.api.v1.auth import admin_required
-
+from flask_jwt_extended import (
+    jwt_required,
+)
 
 api = Namespace('amenities', description='Amenity operations')
 

@@ -18,6 +18,7 @@ from app.api.v1.amenities import api as amenities_ns
 from app.api.v1.places import api as places_ns
 from app.api.v1.reviews import api as reviews_ns
 from app.api.v1.auth import api as auth_ns  # ✅ Import du namespace d'authentification
+from app.api.v1.protected import api as protected_ns
 from config import DevelopmentConfig
 from flask_bcrypt import Bcrypt
 
@@ -59,7 +60,7 @@ def create_app(config_class="config.DevelopmentConfig"):
     api.add_namespace(amenities_ns, path='/api/v1/amenities')
     api.add_namespace(reviews_ns, path='/api/v1/reviews')
     api.add_namespace(auth_ns, path='/api/v1/auth')  # ✅ Ajout de l'authentification
-
+    api.add_namespace(protected_ns, path='/api/v1/protected')
     # Assurer la création des tables de la base de données
     with app.app_context():
         db.create_all()
