@@ -10,6 +10,7 @@ Routes:
 
 from flask_restx import Namespace, Resource, fields
 from app.services.AmenityFacade import AmenityFacade
+from app.api.v1.auth import admin_required
 
 
 api = Namespace('amenities', description='Amenity operations')
@@ -44,6 +45,9 @@ class AmenityList(Resource):
         return ([] if not amenities else [{'id': amenity.id, 'name': amenity.name} for amenity in amenities]), 200
 
     @api.expect(amenity_model)
+    @jwt_required()
+    @admin_required
+    @api.response(403, 'Admin privileges required')
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Invalid input data')
     def post(self):
@@ -86,6 +90,9 @@ class AmenityResource(Resource):
         return {'id': amenity.id, 'name': amenity.name}, 200
 
     @api.expect(amenity_model)
+    @jwt_required()
+    @admin_required
+    @api.response(403, 'Admin privileges required')
     @api.response(200, 'Amenity updated successfully')
     @api.response(404, 'Amenity not found')
     @api.response(400, 'Invalid input data')

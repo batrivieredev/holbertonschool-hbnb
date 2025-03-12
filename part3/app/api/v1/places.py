@@ -130,8 +130,10 @@ class PlaceResource(Resource):
         if not place:
             return {'error': 'Place not found'}, 404
 
-        if str(place.owner_id) != str(current_user.get('id')):
-            return {'error': 'Unauthorized - Not the owner'}, 403
+        # Les admins peuvent modifier n'importe quel lieu
+        if not current_user.get('is_admin'):
+            if str(place.owner_id) != str(current_user.get('id')):
+                return {'error': 'Not authorized'}, 403
 
         place_data = api.payload
         place = facade.update_place(place_id, place_data)

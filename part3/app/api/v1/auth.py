@@ -1,3 +1,5 @@
+"""Module d'authentification et de contrôle d'accès."""
+
 from flask import request
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import (
@@ -7,6 +9,7 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 from app.models import User  # Import du modèle utilisateur
+from functools import wraps
 
 api = Namespace('auth', description='Operations d’authentification')
 
@@ -15,6 +18,16 @@ login_model = api.model('Login', {
     'email': fields.String(required=True, description='Email de l’utilisateur'),
     'password': fields.String(required=True, description='Mot de passe de l’utilisateur')
 })
+
+def admin_required(fn):
+    """Vérifie si l'utilisateur est administrateur."""
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
+            return {'error': 'Admin privileges required'}, 403
+        return fn(*args, **kwargs)
+    return wrapper
 
 @api.route('/login')
 class Login(Resource):
