@@ -11,6 +11,7 @@ Fonctionnalités:
 
 from flask_restx import Namespace, Resource, fields
 from app.services.PlaceFacade import PlaceFacade
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('places', description='Place operations')
 
@@ -43,11 +44,15 @@ place_model = api.model('Place', {
 @api.route('/')
 class PlaceList(Resource):
     @api.expect(place_model)
+    @jwt_required()  # Protection de la création
     @api.response(201, 'Place successfully created')
+    @api.response(403, 'Unauthorized')
     @api.response(400, 'Invalid input data')
     def post(self):
-        """Register a new place"""
+        """Create a new place (auth required)"""
+        current_user = get_jwt_identity()
         place_data = api.payload
+        place_data['owner_id'] = current_user.get('id')
         new_place = facade.create_place(place_data)
         if not new_place:
             return {'error': 'Failed to create place. Owner not found or duplicate title.'}, 400
@@ -112,11 +117,22 @@ class PlaceResource(Resource):
         return {'id': place.id, 'title': place.title, 'price': place.price, 'latitude': place.latitude, 'longitude': place.longitude, 'owner': place.owner, 'amenity': place.add_amenity, 'review': place.add_review}, 200
 
     @api.expect(place_model)
+    @jwt_required()
     @api.response(200, 'Place updated successfully')
+    @api.response(403, 'Unauthorized - Not the owner')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
-        """Update a place's information"""
+        """Update a place (owner only)"""
+        current_user = get_jwt_identity()
+        place = facade.get_place(place_id)
+
+        if not place:
+            return {'error': 'Place not found'}, 404
+
+        if str(place.owner_id) != str(current_user.get('id')):
+            return {'error': 'Unauthorized - Not the owner'}, 403
+
         place_data = api.payload
         place = facade.update_place(place_id, place_data)
         if not place:

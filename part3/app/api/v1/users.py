@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from app.services.UsersFacade import UsersFacade, is_valid_email
 
 """
@@ -110,13 +110,22 @@ class UserResource(Resource):
             'email': user.email
         }, 200
 
+    @jwt_required()
     @api.expect(user_update_model)
-    @api.response(200, 'User successfully updated')
-    @api.response(404, 'User not found')
-    @api.response(400, 'Invalid email format')
+    @api.response(200, 'User updated successfully')
+    @api.response(403, 'Unauthorized - Cannot modify other users')
     def put(self, user_id):
-        """Mettre à jour un utilisateur."""
+        """Update user profile (self only)"""
+        current_user = get_jwt_identity()
+
+        if str(user_id) != str(current_user.get('id')):
+            return {'error': 'Cannot modify other users information'}, 403
+
+        # Empêcher la modification de l'email et du mot de passe
         user_data = api.payload
+        if 'email' in user_data or 'password' in user_data:
+            return {'error': 'Cannot modify email or password'}, 400
+
         email = user_data.get("email")
 
         if email and not is_valid_email(email):
