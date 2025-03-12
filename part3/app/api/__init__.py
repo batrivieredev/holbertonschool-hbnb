@@ -19,7 +19,15 @@ api = Api(
     title='HBnB API',
     description='API REST pour la gestion de locations',
     doc='/api/v1/docs',
-    prefix='/api/v1'
+    prefix='/api/v1',
+    # Ajouter la documentation des modèles
+    authorizations={
+        'Bearer': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
+        }
+    }
 )
 
 # Vérification de la configuration de l'API

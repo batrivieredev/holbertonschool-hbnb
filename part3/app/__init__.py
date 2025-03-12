@@ -9,6 +9,7 @@ Extensions:
     - Flask-Bcrypt: Hachage
 """
 
+import logging
 from flask import Flask
 from flask_restx import Api
 from flask_jwt_extended import JWTManager  # ✅ Import du gestionnaire JWT
@@ -26,42 +27,54 @@ from flask_bcrypt import Bcrypt
 jwt = JWTManager()
 bcrypt = Bcrypt()
 
+# Configuration du logging
+logging.basicConfig(
+    filename='app.log',
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s: %(message)s'
+)
+
 def create_app(config_class="config.DevelopmentConfig"):
-    """Crée et configure l'instance de l'application Flask.
-
-    Args:
-        config_class (str): Classe de configuration à utiliser
-
-    Configuration:
-        - Base de données SQLite
-        - JWT pour l'authentification
-        - Documentation Swagger
-    """
+    """Crée et configure l'instance de l'application Flask."""
     app = Flask(__name__)
 
-    # Configuration de l'application
+    # Configuration de base
     app.config.from_object(config_class)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hbnb.db'  # Changez pour production
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hbnb.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = 'your_secret_key'  # ✅ Clé secrète pour JWT (changez en production)
+    app.config['JWT_SECRET_KEY'] = 'your_secret_key'
 
     # Initialisation des extensions
     db.init_app(app)
-    jwt.init_app(app)  # ✅ Initialisation de JWTManager
+    jwt.init_app(app)
     bcrypt.init_app(app)
 
+    # Ajout d'une route de base pour vérifier que l'API fonctionne
+    @app.route('/')
+    def index():
+        return {'message': 'Welcome to HBnB API'}, 200
+
+    # Gestion des erreurs
+    @app.errorhandler(404)
+    def not_found(error):
+        return {'error': 'Resource not found'}, 404
+
+    @app.errorhandler(500)
+    def server_error(error):
+        return {'error': 'Internal server error'}, 500
+
     # Initialisation de l'API
-    api = Api(app, version='1.0', title='HBnB API',
-              description='HBnB Application API', doc='/api/v1/')
+    api = Api(app)
 
     # Enregistrement des namespaces
     api.add_namespace(places_ns, path='/api/v1/places')
     api.add_namespace(users_ns, path='/api/v1/users')
     api.add_namespace(amenities_ns, path='/api/v1/amenities')
     api.add_namespace(reviews_ns, path='/api/v1/reviews')
-    api.add_namespace(auth_ns, path='/api/v1/auth')  # ✅ Ajout de l'authentification
+    api.add_namespace(auth_ns, path='/api/v1/auth')
     api.add_namespace(protected_ns, path='/api/v1/protected')
-    # Assurer la création des tables de la base de données
+
+    # Création des tables
     with app.app_context():
         db.create_all()
 

@@ -175,5 +175,13 @@ class TestAmenitiesAPI(unittest.TestCase):
         response = requests.post(f"{BASE_URL}bulk", json=bulk_data, headers=self.headers)
         self.assertIn(response.status_code, [200, 201, 405, 422])  # Ajout de 405 pour Method Not Allowed
 
+    def test_17_performance(self):
+        """Test de performance pour les opérations courantes"""
+        import time
+        start_time = time.time()
+        response = requests.get(BASE_URL, headers=self.headers)
+        end_time = time.time()
+        self.assertLess(end_time - start_time, 1.0)  # Réponse < 1 seconde
+
 if __name__ == "__main__":
     unittest.main()

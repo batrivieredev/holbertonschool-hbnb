@@ -14,6 +14,10 @@ class Config:
     """Configuration de base commune à tous les environnements."""
     SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
     DEBUG = False
+    # Ajouter plus de configurations
+    RATE_LIMITING = True
+    MAX_REQUESTS = 100
+    CACHE_TYPE = "simple"
 
 class DevelopmentConfig(Config):
     """Configuration spécifique à l'environnement de développement.

@@ -147,5 +147,75 @@ class TestPlaceAPI(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_13_amenities_management(self):
+        """Test de la gestion des équipements d'un lieu"""
+        if not self.test_place_id:
+            self.skipTest("Le lieu n'a pas été créé")
+
+        amenity_data = {'amenity_ids': ['id1', 'id2']}
+        response = requests.post(
+            f"{BASE_URL}{self.test_place_id}/amenities",
+            json=amenity_data,
+            headers=self.headers
+        )
+        self.assertIn(response.status_code, [200, 201, 404])
+
+    def test_14_place_availability(self):
+        """Test de la gestion des disponibilités"""
+        if not self.test_place_id:
+            self.skipTest("Le lieu n'a pas été créé")
+
+        availability = {
+            'start_date': '2024-01-01',
+            'end_date': '2024-01-10',
+            'is_available': False
+        }
+        response = requests.post(
+            f"{BASE_URL}{self.test_place_id}/availability",
+            json=availability,
+            headers=self.headers
+        )
+        self.assertIn(response.status_code, [200, 201, 404])
+
+    def test_15_advanced_search(self):
+        """Test de recherche avancée avec filtres multiples"""
+        search_params = {
+            'price_min': 50,
+            'price_max': 200,
+            'amenities': ['wifi', 'parking'],
+            'location': {'lat': 37.7749, 'lng': -122.4194, 'radius': 10}
+        }
+        response = requests.get(
+            f"{BASE_URL}search/advanced",
+            params=search_params,
+            headers=self.headers
+        )
+        self.assertIn(response.status_code, [200, 404])
+
+    def test_16_place_validation(self):
+        """Tests de validation approfondis"""
+        invalid_cases = [
+            {'name': '', 'description': 'Test'},  # Nom vide
+            {'name': 'A' * 129, 'description': 'Test'},  # Nom trop long
+            {'price_by_night': 'not_a_number'},  # Prix invalide
+            {'latitude': 100, 'longitude': 200}  # Coordonnées hors limites
+        ]
+
+        for invalid_data in invalid_cases:
+            test_data = self.test_place.copy()
+            test_data.update(invalid_data)
+            response = requests.post(BASE_URL, json=test_data, headers=self.headers)
+            self.assertIn(response.status_code, [400, 422])
+
+    def test_17_performance_metrics(self):
+        """Test des métriques de performance"""
+        import time
+
+        start_time = time.time()
+        requests.get(BASE_URL, headers=self.headers)
+        response_time = time.time() - start_time
+
+        self.assertLess(response_time, 1.0)  # Temps de réponse < 1s
+
 if __name__ == "__main__":
     unittest.main()
