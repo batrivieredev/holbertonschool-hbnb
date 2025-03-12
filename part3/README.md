@@ -1,40 +1,41 @@
-# HBnB API
-
-API REST pour la gestion de locations de propriétés.
+# HBNB API Project
 
 ## Installation
 
-1. Créer un environnement virtuel:
+1. Installer python3-venv si ce n'est pas déjà fait :
 ```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
+sudo apt-get install python3-venv
 ```
 
-2. Installer les dépendances:
+2. Créer l'environnement virtuel :
 ```bash
-pip install -e .
+python3 -m venv venv
 ```
 
-3. Configurer l'environnement:
+3. Activer l'environnement virtuel :
 ```bash
-cp .env.example .env
-# Modifier les variables dans .env
+source venv/bin/activate
 ```
 
-4. Lancer l'application:
+4. Installer les dépendances :
 ```bash
-flask run
+pip install -r requirements.txt
 ```
 
-## Documentation API
-
-L'API est documentée avec Swagger UI, accessible à `/api/v1/`.
+5. Lancer l'application :
+```bash
+python3 run.py
+```
 
 ## Tests
 
-Pour lancer les tests:
+Pour exécuter les tests unitaires :
 ```bash
-python -m unittest discover tests
+python3 -m unittest tests/test_amenity_api.py
 ```
 
-## Structure du Projet
+Note: Assurez-vous que l'environnement virtuel est activé avant d'exécuter les commandes.
+Pour désactiver l'environnement virtuel :
+```bash
+deactivate
+```
