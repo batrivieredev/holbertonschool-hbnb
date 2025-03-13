@@ -1,18 +1,8 @@
-"""
-Facade pour la gestion des utilisateurs.
-Implémente la logique métier des comptes utilisateurs.
-
-Responsabilités:
-    - Validation des données utilisateur
-    - Hachage des mots de passe
-    - Gestion des sessions
-    - Vérification des droits
-"""
-
 from app.models.user import User
 from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 import re
 from flask_bcrypt import Bcrypt
+from app.extensions import db
 
 bcrypt = Bcrypt()
 
@@ -22,28 +12,38 @@ def is_valid_email(email):
     return re.match(email_regex, email) is not None
 
 class UsersFacade():
-
     def __init__(self):
         self.user_repo = SQLAlchemyRepository(User)
 
+    def hash_password(self, password):
+        """Hache le mot de passe avec Bcrypt"""
+        return bcrypt.generate_password_hash(password).decode('utf-8')
+
     def create_user(self, user_data):
+        """Crée un utilisateur avec un mot de passe haché déjà reçu"""
         email = user_data.get("email")
-        password = user_data.get("password")
 
         if not is_valid_email(email):
-            print("❌ Email invalide:", email)  # ✅ Debug email
             return None  # Rejette l'email invalide
 
-        if not password:
-            print("❌ Mot de passe manquant!")  # ✅ Debug password
-            return None
+        if self.get_user_by_email(email):
+            return None  # L'email existe déjà
 
-        user_data["password"] = self.hash_password(password)
-        print("✅ Création utilisateur avec email:", email)  # ✅ Debug utilisateur
+        password_hashed = user_data.pop('password', None)  # 🔹 Déjà haché en amont
+        if not password_hashed:
+            return None  # Mot de passe obligatoire
+
+        print(f"✅ Mot de passe déjà haché reçu : {password_hashed}")  # ✅ Debug
 
         user = User(**user_data)
-        self.user_repo.add(user)
-        print(f"✅ Utilisateur {email} créé en base")
+        user.password = password_hashed  # 🔹 On stocke le hash tel quel
+
+        self.user_repo.add(user)  # 🔹 Ajout en base
+        db.session.commit()  # 🔹 Commit SQLAlchemy
+
+        stored_user = self.get_user_by_email(email)
+        print(f"📌 Mot de passe APRÈS insertion en DB : {stored_user.password}")  # ✅ Debug
+
         return user
 
     def get_user(self, user_id):
@@ -67,24 +67,3 @@ class UsersFacade():
 
     def delete_user(self, user_id):
         return self.user_repo.delete(user_id)
-
-    def hash_password(self, password):
-        """Hache et retourne le mot de passe."""
-        return bcrypt.generate_password_hash(password).decode('utf-8')  # ✅ Retourne la valeur hachée
-
-    def verify_password(self, user, password):
-        """Vérifie si le mot de passe fourni correspond.
-
-        Sécurité:
-            - Utilise bcrypt pour le hachage
-            - Protection contre les attaques timing
-            - Nombre d'itérations configurable
-
-        Args:
-            user (User): Utilisateur dont on vérifie le mot de passe
-            password (str): Mot de passe en clair
-
-        Returns:
-            bool: True si valide, False sinon
-        """
-        return bcrypt.check_password_hash(user.password, password)  # ✅ Vérifie le hash du bon utilisateur

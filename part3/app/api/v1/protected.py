@@ -25,7 +25,7 @@ def log_access(user_id, endpoint):
     """
     print(f"[{datetime.utcnow()}] Accès à {endpoint} par utilisateur {user_id}")
 
-@api.route('/protected')
+@api.route('/', strict_slashes=False)
 class ProtectedResource(Resource):
     """Ressource nécessitant une authentification.
 
@@ -47,9 +47,18 @@ class ProtectedResource(Resource):
             int: Code HTTP 200 si succès
         """
         current_user = get_jwt_identity()
+        print(f"🔐 Accès autorisé pour {current_user}")  # Debug
         log_access(current_user["id"], request.endpoint)
 
         return {
             'message': f'Bienvenue, utilisateur {current_user["id"]}!',
             'timestamp': datetime.utcnow().isoformat()
         }, 200
+
+@api.route('/secure-data')
+class ProtectedResource(Resource):
+    @jwt_required()
+    def get(self):
+        """Endpoint protégé nécessitant un token."""
+        current_user = get_jwt_identity()
+        return {"message": f"Bienvenue, {current_user['id']}!"}, 200

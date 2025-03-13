@@ -12,7 +12,9 @@ Variables d'environnement:
 
 class Config:
     """Configuration de base commune à tous les environnements."""
-    SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
+    SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key_here")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
     DEBUG = False
     # Ajouter plus de configurations
     RATE_LIMITING = True
@@ -28,7 +30,8 @@ class DevelopmentConfig(Config):
         - Clés par défaut pour dev
     """
     SECRET_KEY = os.getenv("SECRET_KEY", "my_super_secret_key")
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "my_super_secret_key")
+    SQLALCHEMY_DATABASE_URI = "sqlite:///instance/hbnb.db"
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "supersecretjwtkey")
     DEBUG = True
 
 config = {
