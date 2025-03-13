@@ -94,3 +94,4 @@ erDiagram
     PLACE ||--o{ REVIEW : receives
     PLACE ||--o{ PLACE_AMENITY : has
     AMENITY ||--o{ PLACE_AMENITY : is_available_in
+```
