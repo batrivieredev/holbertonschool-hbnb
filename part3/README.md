@@ -45,7 +45,7 @@ deactivate
 ```mermaid
 erDiagram
     USER {
-        int id PK
+        int id
         string first_name
         string last_name
         string email
@@ -55,41 +55,42 @@ erDiagram
     }
 
     PLACE {
-        int id PK
+        int id
         string title
         string description
         float price
         float latitude
         float longitude
-        int owner_id FK
+        int owner_id
         datetime created_at
         datetime updated_at
     }
 
     REVIEW {
-        int id PK
+        int id
         string text
         int rating
-        int place_id FK
-        int user_id FK
+        int place_id
+        int user_id
         datetime created_at
         datetime updated_at
     }
 
     AMENITY {
-        int id PK
+        int id
         string name
         datetime created_at
         datetime updated_at
     }
 
     PLACE_AMENITY {
-        int place_id FK
-        int amenity_id FK
+        int place_id
+        int amenity_id
     }
 
-    USER ||--o{ PLACE: "owns"
-    USER ||--o{ REVIEW: "writes"
-    PLACE ||--o{ REVIEW: "receives"
-    PLACE ||--o{ PLACE_AMENITY: "has"
-    AMENITY ||--o{ PLACE_AMENITY: "is available in"
+    %% Relations (les clés étrangères sont gérées ici)
+    USER ||--o{ PLACE : owns
+    USER ||--o{ REVIEW : writes
+    PLACE ||--o{ REVIEW : receives
+    PLACE ||--o{ PLACE_AMENITY : has
+    AMENITY ||--o{ PLACE_AMENITY : is_available_in
