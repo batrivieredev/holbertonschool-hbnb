@@ -47,6 +47,7 @@ class AmenityList(Resource):
         return ([] if not amenities else [{'id': amenity.id, 'name': amenity.name} for amenity in amenities]), 200
 
     @api.expect(amenity_model)
+    @api.doc(security='jwt')
     @jwt_required()
     @admin_required
     @api.response(403, 'Admin privileges required')
@@ -92,6 +93,7 @@ class AmenityResource(Resource):
         return {'id': amenity.id, 'name': amenity.name}, 200
 
     @api.expect(amenity_model)
+    @api.doc(security='jwt')
     @jwt_required()
     @admin_required
     @api.response(403, 'Admin privileges required')

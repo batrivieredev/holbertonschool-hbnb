@@ -11,8 +11,10 @@ from flask_jwt_extended import (
 from flask_bcrypt import check_password_hash  # ✅ Ajout pour SQLite
 from app.models import User  # Import du modèle utilisateur
 from functools import wraps
+from app.services.UsersFacade import UsersFacade
 
 api = Namespace('auth', description='Operations d’authentification')
+facade = UsersFacade()
 
 # Modèle pour la validation des entrées
 login_model = api.model('Login', {
@@ -23,6 +25,7 @@ login_model = api.model('Login', {
 def admin_required(fn):
     """Vérifie si l'utilisateur est administrateur."""
     @wraps(fn)
+    @api.doc(security='jwt')
     @jwt_required()  # ✅ Ajout de jwt_required() pour éviter une erreur 500
     def wrapper(*args, **kwargs):
         current_user = get_jwt_identity()  # ✅ get_jwt_identity() retourne un dict
@@ -33,39 +36,17 @@ def admin_required(fn):
 
 @api.route('/login')
 class Login(Resource):
-    """Gère l'authentification des utilisateurs."""
-
     @api.expect(login_model)
     def post(self):
-        """Authentification de l’utilisateur et génération du JWT token"""
-        data = request.json
-        email = data.get('email')
-        password = data.get('password')
+        """Authenticate user and return a JWT token"""
+        credentials = api.payload
+        user = facade.get_user_by_email(credentials['email'])
 
-        print(f"📌 Tentative de connexion pour {email}")  # ✅ Debug
+        if not user or not user.verify_password(credentials['password']):
+            return {'error': 'Invalid credentials'}, 401
 
-        # Récupérer l’utilisateur par email
-        user = User.query.filter_by(email=email).first()
-        if user:
-            print(f"📌 Mot de passe récupéré depuis la base : '{user.password}'")
-        print(f"📌 Utilisateur trouvé en base : {user}")  # ✅ Debug
-        print(f"📌 Mot de passe haché récupéré : {user.password}")
-
-        # ⬇⬇ TEST MANUEL DE bcrypt ⬇⬇
-        from flask_bcrypt import check_password_hash
-        bcrypt_test = check_password_hash(user.password, password)
-        print(f"✅ bcrypt_test (devrait être True) : {bcrypt_test}")  # ✅ Debug
-        # ⬆⬆ FIN TEST ⬆⬆
-
-        if not user or not user.verify_password(password):  # ✅ Vérification correcte
-            print("❌ Identifiants invalides")  # ✅ Debug
-            return {'error': 'Identifiants invalides'}, 401
-
-        # Générer un token JWT
-        access_token = create_access_token(identity={'id': str(user.id), 'is_admin': user.is_admin})
-        refresh_token = create_refresh_token(identity={'id': str(user.id), 'is_admin': user.is_admin})
-
-        return {'access_token': access_token, 'refresh_token': refresh_token}, 200
+        access_token = create_access_token(identity={"id": user.id, "is_admin": user.is_admin})
+        return {"access_token": access_token}, 200
 
 
 @api.route('/refresh')

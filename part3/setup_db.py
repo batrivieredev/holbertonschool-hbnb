@@ -1,53 +1,45 @@
 import os
 from app import create_app
-from app.extensions import db
-from app.models import User, Place, Review, Amenity  # ✅ Vérifier l'import des modèles
-from sqlalchemy import inspect
+from sqlalchemy import create_engine, text
 
-DB_PATH = "hbnb.db"
+DB_NAME = "hbnb_db"
+SQL_SCRIPT_PATH = "hbnb_schema.sql"
 
 def reset_database():
-    """Supprime l'ancienne base de données et recrée une nouvelle."""
-    if os.path.exists(DB_PATH):
-        print("🔄 Suppression de l'ancienne base de données...")
-        os.remove(DB_PATH)
-    else:
-        print("✅ Aucune base existante, création d'une nouvelle...")
+    """Vérifie et recrée la base de données si elle n'existe pas."""
+    
+    # 📌 Connexion directe à MySQL sans base
+    engine = create_engine("mysql+pymysql://debian-sys-maint:fB33r9vNp0V8hA8M@localhost/")
 
-    # Créer l'application Flask et initialiser la base
-    app = create_app()
-    with app.app_context():
-        print("🔄 Création des tables en cours...")
+    with engine.connect() as connection:
         try:
-            print("📌 URL de la base de données utilisée:", db.engine.url)
-            db.create_all()  # ✅ Création des tables
-            print("📌 Colonnes de la table users :", db.metadata.tables["users"].columns.keys())
-            print("📌 Modèles SQLAlchemy détectés :", db.metadata.tables.keys())
-            print("✅ Base de données créée avec succès !")
+            # Vérifier si la base existe
+            result = connection.execute(text(f"SHOW DATABASES LIKE '{DB_NAME}';"))
+            db_exists = result.fetchone()
 
-            # Vérification des tables créées
-            inspector = inspect(db.engine)
-            print("📌 Tables détectées après création:", inspector.get_table_names())
+            if not db_exists:
+                print(f"🔄 La base {DB_NAME} n'existe pas, création en cours...")
+                connection.execute(text(f"CREATE DATABASE {DB_NAME};"))
+                print(f"✅ Base de données {DB_NAME} créée.")
 
         except Exception as e:
-            print("❌ ERREUR LORS DE LA CRÉATION DES TABLES :", e)
+            print(f"❌ ERREUR LORS DE LA CRÉATION DE LA BASE : {e}")
+            return
 
-def clean_database():
-    """Supprime toutes les données des tables sans supprimer la structure."""
+    # 📌 Maintenant, on peut attacher Flask à la base et exécuter le script SQL
     app = create_app()
     with app.app_context():
-        try:
-            print("🧹 Nettoyage de la base de données en cours...")
-            meta = db.metadata
-            for table in reversed(meta.sorted_tables):
-                print(f"🗑 Suppression des données de {table.name}...")
-                db.session.execute(table.delete())  # ✅ Supprime les données mais garde les tables
-            db.session.commit()
-            print("✅ Base de données nettoyée avec succès !")
-        except Exception as e:
-            print(f"❌ Erreur lors du nettoyage de la base de données : {e}")
-            db.session.rollback()
-
+        with app.extensions['sqlalchemy'].engine.connect() as connection:
+            print(f"🔄 Exécution du script SQL sur {DB_NAME}...")
+            try:
+                with open(SQL_SCRIPT_PATH, "r") as sql_file:
+                    sql_commands = sql_file.read().split(";")
+                for command in sql_commands:
+                    if command.strip():
+                        connection.execute(text(command))
+                print("✅ Base de données initialisée avec succès.")
+            except Exception as e:
+                print(f"❌ ERREUR LORS DE L'EXÉCUTION DU SCRIPT SQL : {e}")
 
 if __name__ == "__main__":
     reset_database()

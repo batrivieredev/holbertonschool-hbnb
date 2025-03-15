@@ -35,6 +35,7 @@ class ProtectedResource(Resource):
         - Journalisation des accès
     """
 
+    @api.doc(security='jwt')
     @jwt_required()
     @api.doc(security='jwt')
     @api.response(200, 'Accès autorisé')
@@ -57,6 +58,7 @@ class ProtectedResource(Resource):
 
 @api.route('/secure-data')
 class ProtectedResource(Resource):
+    @api.doc(security='jwt')
     @jwt_required()
     def get(self):
         """Endpoint protégé nécessitant un token."""

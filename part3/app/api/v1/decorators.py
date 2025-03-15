@@ -10,6 +10,7 @@ Décorateurs disponibles:
 
 from flask_jwt_extended import get_jwt_identity
 from flask import jsonify
+from functools import wraps
 
 def admin_required(fn):
     """Décorateur pour restreindre l'accès aux administrateurs.
@@ -22,9 +23,10 @@ def admin_required(fn):
     Returns:
         function: Fonction décorée ou erreur 403
     """
+    @wraps(fn)
     def wrapper(*args, **kwargs):
         current_user = get_jwt_identity()
         if not current_user.get('is_admin'):
-            return jsonify({'error': 'Accès interdit'}), 403
+            return jsonify({'error': 'Admin privileges required'}), 403
         return fn(*args, **kwargs)
     return wrapper

@@ -10,44 +10,26 @@ Structure:
     - auth: Authentification
 """
 
-from flask import Flask
 from flask_restx import Api
+
+# Import des namespaces
 from app.api.v1.users import api as users_ns
 from app.api.v1.amenities import api as amenities_ns
 from app.api.v1.places import api as places_ns
 from app.api.v1.reviews import api as reviews_ns
 from app.api.v1.auth import api as auth_ns
 
-def create_app():
-    """Crée et configure l'application Flask avec l'API REST.
+# Définition de l'objet API global
+api = Api(
+    version="1.0",
+    title="HBnB API",
+    description="API REST pour la gestion de locations",
+    doc="/api/v1/docs",
+)
 
-    Configuration:
-        - Version API: 1.0
-        - Documentation Swagger intégrée
-        - Namespaces préfixés avec /api/v1
-
-    Returns:
-        Flask: Application configurée avec tous les endpoints
-    """
-    app = Flask(__name__)
-    api = Api(
-        app,
-        version='1.0',
-        title='HBnB API',
-        description='API REST pour la gestion de locations',
-        doc='/api/v1/docs'  # Point d'accès pour la documentation Swagger
-    )
-
-    # Enregistrement des namespaces avec leurs préfixes
-    namespaces = [
-        (amenities_ns, '/api/v1/amenities'),
-        (users_ns, '/api/v1/users'),
-        (places_ns, '/api/v1/places'),
-        (reviews_ns, '/api/v1/reviews'),
-        (auth_ns, '/api/v1/auth')
-    ]
-
-    for ns, path in namespaces:
-        api.add_namespace(ns, path=path)
-
-    return app
+# Ajout des namespaces
+api.add_namespace(users_ns, path="/users")
+api.add_namespace(places_ns, path="/places")
+api.add_namespace(reviews_ns, path="/reviews")
+api.add_namespace(amenities_ns, path="/amenities")
+api.add_namespace(auth_ns, path="/auth")

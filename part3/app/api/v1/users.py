@@ -106,6 +106,7 @@ class UserResource(Resource):
             'email': user.email
         }, 200
 
+    @api.doc(security='jwt')
     @jwt_required()
     @api.expect(user_update_model)
     @api.response(200, 'User updated successfully')
@@ -115,7 +116,7 @@ class UserResource(Resource):
         current_user = get_jwt_identity()
 
         if str(user_id) != str(current_user.get('id')):
-            return {'error': 'Cannot modify other users information'}, 403
+            return {'error': 'Unauthorized - You can only modify your own profile'}, 403
 
         user_data = api.payload
         if 'email' in user_data or 'password' in user_data:

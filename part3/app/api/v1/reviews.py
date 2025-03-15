@@ -10,140 +10,168 @@ Fonctionnalités:
 """
 
 from flask_restx import Namespace, Resource, fields
-from app.services.ReviewFacade import ReviewFacade
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
-from flask_restx import Namespace, Resource, fields
-from app.services import facade
+from app.services.ReviewFacade import ReviewFacade
+from app.services.PlaceFacade import PlaceFacade
 
 api = Namespace('reviews', description='Review operations')
 
-# Define the review model for input validation and documentation
+# Instance de la Facade
+review_facade = ReviewFacade()
+place_facade = PlaceFacade()
+
+# Modèle de validation des données pour Swagger
 review_model = api.model('Review', {
     'text': fields.String(
         required=True,
-        description='Contenu de l\'avis',
+        description="Contenu de l'avis",
         example="Excellent séjour, très bon accueil"
     ),
     'rating': fields.Integer(
         required=True,
-        description='Note sur 5',
+        description="Note sur 5",
         min=1,
         max=5,
         example=4
     ),
-    'user_id': fields.String(description='ID de l\'auteur'),
-    'place_id': fields.String(description='ID du lieu concerné')
+    'place_id': fields.String(required=True, description="ID du lieu concerné")
 })
+
 
 @api.route('/')
 class ReviewList(Resource):
-    @api.expect(review_model)
+    @api.doc(security='jwt')
     @jwt_required()
+    @api.expect(review_model)
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
     @api.response(403, 'Unauthorized')
     def post(self):
-        """Register a new review"""
+        """Créer un nouvel avis"""
         current_user = get_jwt_identity()
         review_data = api.payload
-        text = review_data.get('text')
-        if not text or not isinstance(text, str) or text.strip() == "":
+
+        # Validation des entrées
+        if not review_data.get('text') or not isinstance(review_data['text'], str):
             return {'error': 'Text is required and must be a non-empty string'}, 400
 
-        rating = review_data.get('rating')
-        if not rating or not isinstance(rating, int) or rating < 1 or rating > 5:
+        if not (1 <= review_data.get('rating', 0) <= 5):
             return {'error': 'Rating must be an integer between 1 and 5'}, 400
 
-        user_id = review_data.get('user_id')
-        if not user_id or not isinstance(user_id, str) or user_id.strip() == "":
-            return {'error': 'User ID is required and must be a non-empty string'}, 400
+        if not review_data.get('place_id'):
+            return {'error': 'Place ID is required'}, 400
 
-        place_id = review_data.get('place_id')
-        if not place_id or not isinstance(place_id, str) or place_id.strip() == "":
-            return {'error': 'Place ID is required and must be a non-empty string'}, 400
+        # Vérifier si le lieu existe
+        place = place_facade.get_place(review_data['place_id'])
+        if not place:
+            return {'error': 'Place not found'}, 404
 
         # Vérifier si l'utilisateur est propriétaire du lieu
-        place = facade.get_place(review_data.get('place_id'))
-        if str(place.owner_id) == str(current_user.get('id')):
+        if str(place.owner_id) == str(current_user['id']):
             return {'error': 'Cannot review your own place'}, 403
 
-        # Vérifier si l'utilisateur a déjà laissé un avis
-        existing_review = facade.get_user_review_for_place(
-            current_user.get('id'),
-            review_data.get('place_id')
+        # Vérifier si l'utilisateur a déjà laissé un avis sur ce lieu
+        existing_review = review_facade.get_review_by_user_and_place(
+            current_user['id'], review_data['place_id']
         )
         if existing_review:
-            return {'error': 'Already reviewed this place'}, 403
+            return {'error': 'You have already reviewed this place'}, 403
 
-        review_data['user_id'] = current_user.get('id')
+        # Création de l'avis
+        review_data['user_id'] = current_user['id']
+        new_review = review_facade.create_review(review_data)
 
-        new_review = facade.create_review(review_data)
-        return {'id': new_review.id, 'text': new_review.text, 'rating': new_review.rating,
-                'user_id': new_review.user_id, 'place_id': new_review.place_id}, 201
-
-
+        return {
+            'id': new_review.id,
+            'text': new_review.text,
+            'rating': new_review.rating,
+            'user_id': new_review.user_id,
+            'place_id': new_review.place_id
+        }, 201
 
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):
-        """Retrieve a list of all reviews"""
-        reviews = facade.get_all_reviews()
-        return [{'id': review.id, 'text': review.text, 'rating': review.rating,
-                 'user_id': review.user_id, 'place_id': review.place_id} for review in reviews], 200
+        """Récupérer toutes les reviews"""
+        try:
+            reviews = review_facade.get_all_reviews()
+            return [
+                {'id': r.id, 'text': r.text, 'rating': r.rating, 'user_id': r.user_id, 'place_id': r.place_id}
+                for r in reviews
+            ], 200
+        except Exception as e:
+            return {'error': str(e)}, 500
 
-@api.route('/<review_id>')
+
+@api.route('/<string:review_id>')
 class ReviewResource(Resource):
+    @api.doc(security='jwt')
     @jwt_required()
     @api.response(200, 'Review details retrieved successfully')
     @api.response(404, 'Review not found')
     def get(self, review_id):
-        """Get review details by ID"""
-        review = facade.get_review(review_id)
+        """Obtenir les détails d'une review par ID"""
+        review = review_facade.get_review(review_id)
         if not review:
             return {'error': 'Review not found'}, 404
-        return {'id': review.id, 'text': review.text, 'rating': review.rating,
-                'user_id': review.user_id, 'place_id': review.place_id}, 200
+        return {
+            'id': review.id,
+            'text': review.text,
+            'rating': review.rating,
+            'user_id': review.user_id,
+            'place_id': review.place_id
+        }, 200
 
-    @api.expect(review_model)
+    @api.doc(security='jwt')
     @jwt_required()
+    @api.expect(review_model)
     @api.response(200, 'Review updated successfully')
-    @api.response(404, 'Review not found')
-    @api.response(400, 'Invalid input data')
     @api.response(403, 'Unauthorized - Not the author')
+    @api.response(404, 'Review not found')
     def put(self, review_id):
-        """Update a review's information"""
+        """Mettre à jour une review"""
         current_user = get_jwt_identity()
-        review = facade.get_review(review_id)
+        review = review_facade.get_review(review_id)
 
         if not review:
             return {'error': 'Review not found'}, 404
 
-        if str(review.user_id) != str(current_user.get('id')):
+        if str(review.user_id) != str(current_user['id']):
             return {'error': 'Unauthorized - Not the review author'}, 403
 
         review_data = api.payload
-        review = facade.update_review(review_id, review_data)
-        if not review:
-            return {'error': 'Review not found'}, 404
-        return {'id': review.id, 'text': review.text, 'rating': review.rating,
-                'user_id': review.user_id, 'place_id': review.place_id}, 200
+        updated_review = review_facade.update_review(review_id, review_data)
+        return {
+            'id': updated_review.id,
+            'text': updated_review.text,
+            'rating': updated_review.rating,
+            'user_id': updated_review.user_id,
+            'place_id': updated_review.place_id
+        }, 200
 
+    @api.doc(security='jwt')
+    @jwt_required()
     @api.response(200, 'Review deleted successfully')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
-        """Delete a review"""
-        facade.delete_review(review_id)
+        """Supprimer une review"""
+        review = review_facade.get_review(review_id)
+        if not review:
+            return {'error': 'Review not found'}, 404
+        review_facade.delete_review(review_id)
         return {'message': 'Review deleted successfully'}, 200
 
-@api.route('/places/<place_id>/reviews')
+
+@api.route('/places/<string:place_id>/reviews')
 class PlaceReviewList(Resource):
     @api.response(200, 'List of reviews for the place retrieved successfully')
     @api.response(404, 'Place not found')
     def get(self, place_id):
-        """Get all reviews for a specific place"""
-        place = facade.get_place(place_id)
+        """Obtenir toutes les reviews d'un lieu spécifique"""
+        place = place_facade.get_place(place_id)
         if not place:
             return {'error': 'Place not found'}, 404
-        reviews = facade.get_place_reviews(place_id)
-        return [{'id': review.id, 'text': review.text, 'rating': review.rating,
-                 'user_id': review.user_id, 'place_id': review.place_id} for review in reviews], 200
+        reviews = review_facade.get_reviews_by_place(place_id)
+        return [
+            {'id': r.id, 'text': r.text, 'rating': r.rating, 'user_id': r.user_id, 'place_id': r.place_id}
+            for r in reviews
+        ], 200

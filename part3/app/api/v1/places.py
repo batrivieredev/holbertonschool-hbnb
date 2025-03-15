@@ -44,6 +44,7 @@ place_model = api.model('Place', {
 @api.route('/')
 class PlaceList(Resource):
     @api.expect(place_model)
+    @api.doc(security='jwt')
     @jwt_required()  # Protection de la création
     @api.response(201, 'Place successfully created')
     @api.response(403, 'Unauthorized')
@@ -52,25 +53,13 @@ class PlaceList(Resource):
         """Create a new place (auth required)"""
         current_user = get_jwt_identity()
         place_data = api.payload
-        place_data['owner_id'] = current_user.get('id')
+        place_data['owner_id'] = current_user['id']
         new_place = facade.create_place(place_data)
+
         if not new_place:
-            return {'error': 'Failed to create place. Owner not found or duplicate title.'}, 400
-        return {
-            'id': new_place.id,
-            'title': new_place.title,
-            'price': new_place.price,
-            'latitude': new_place.latitude,
-            'longitude': new_place.longitude,
-            'owner': {
-                'id': new_place.owner.id,
-                'first_name': new_place.owner.first_name,
-                'last_name': new_place.owner.last_name,
-                'email': new_place.owner.email
-            } if new_place.owner else None,  # Ajout de la vérification pour owner
-            'amenity': new_place.add_amenity,
-            'review': new_place.add_review
-        }, 201
+            return {'error': 'Failed to create place'}, 400
+
+        return new_place.to_dict(), 201
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
@@ -117,6 +106,7 @@ class PlaceResource(Resource):
         return {'id': place.id, 'title': place.title, 'price': place.price, 'latitude': place.latitude, 'longitude': place.longitude, 'owner': place.owner, 'amenity': place.add_amenity, 'review': place.add_review}, 200
 
     @api.expect(place_model)
+    @api.doc(security='jwt')
     @jwt_required()
     @api.response(200, 'Place updated successfully')
     @api.response(403, 'Unauthorized - Not the owner')

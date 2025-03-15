@@ -9,6 +9,10 @@ Extensions:
 """
 
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager
 
 # Instance SQLAlchemy partagée dans toute l'application
 db = SQLAlchemy()  # Define it globally without app binding
+bcrypt = Bcrypt()
+jwt = JWTManager()
