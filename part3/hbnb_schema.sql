@@ -59,20 +59,11 @@ CREATE TABLE IF NOT EXISTS place_amenity (
     FOREIGN KEY (amenity_id) REFERENCES amenities(id) ON DELETE CASCADE
 );
 
--- Insertion de l'utilisateur administrateur
-INSERT INTO users (id, first_name, last_name, email, password, is_admin)
-VALUES (
-    '36c9050e-ddd3-4c3b-9731-9f487208bbc1',
-    'Admin',
-    'HBnB',
-    'admin@hbnb.io',
-    '$2b$12$eB0lq8xSTUjO/gPvrgKxJO4elwOXFz8twktv/PO0e1xHAvl1Jf5x.', -- Hash du mot de passe 'admin1234'
-    TRUE
-) ON DUPLICATE KEY UPDATE email=email;
-
 -- Insertion des équipements initiaux
 INSERT INTO amenities (id, name) VALUES
     (UUID(), 'WiFi'),
     (UUID(), 'Swimming Pool'),
     (UUID(), 'Air Conditioning')
 ON DUPLICATE KEY UPDATE name=name;
+
+COMMIT;

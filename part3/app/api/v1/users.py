@@ -2,6 +2,7 @@
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services.UsersFacade import UsersFacade, is_valid_email
+from app.api.v1.decorators import admin_required
 
 """
 Module gérant l'API des utilisateurs.
@@ -37,6 +38,8 @@ class UserList(Resource):
     @api.response(201, 'User successfully created')
     @api.response(400, 'Invalid email format')
     @api.response(400, 'Email already registered')
+    @admin_required
+    @jwt_required()
     def post(self):
         """Créer un nouvel utilisateur (Inscription ouverte)"""
         user_data = api.payload
@@ -76,8 +79,10 @@ class UserList(Resource):
 
 
     @api.response(200, 'List of users retrieved successfully')
+    @jwt_required()  # ✅ Ajout de protection
+    @admin_required  # ✅ Seuls les admins peuvent voir la liste des utilisateurs
     def get(self):
-        """Récupérer la liste des utilisateurs."""
+        """Récupérer la liste des utilisateurs (ADMIN ONLY)."""
         users = facade.get_all_users()
         return [
             {
@@ -108,6 +113,7 @@ class UserResource(Resource):
 
     @api.doc(security='jwt')
     @jwt_required()
+    @admin_required
     @api.expect(user_update_model)
     @api.response(200, 'User updated successfully')
     @api.response(403, 'Unauthorized - Cannot modify other users')

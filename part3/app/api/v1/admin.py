@@ -11,7 +11,7 @@ Fonctionnalités:
 
 from flask_restx import Namespace, Resource
 from flask_jwt_extended import jwt_required
-from api.v1.decorators import admin_required
+from app.api.v1.decorators import admin_required
 from app.services.UsersFacade import UsersFacade
 
 
