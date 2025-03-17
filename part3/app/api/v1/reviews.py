@@ -13,6 +13,7 @@ from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services.ReviewFacade import ReviewFacade
 from app.services.PlaceFacade import PlaceFacade
+from flask import request
 
 api = Namespace('reviews', description='Review operations')
 
@@ -47,47 +48,21 @@ class ReviewList(Resource):
     @api.response(400, 'Invalid input data')
     @api.response(403, 'Unauthorized')
     def post(self):
-        """Créer un nouvel avis"""
+        """Create a review (Only if not owner & once per place)"""
         current_user = get_jwt_identity()
-        review_data = api.payload
+        data = request.json
+        place = place_facade.get_place(data['place_id'])
 
-        # Validation des entrées
-        if not review_data.get('text') or not isinstance(review_data['text'], str):
-            return {'error': 'Text is required and must be a non-empty string'}, 400
-
-        if not (1 <= review_data.get('rating', 0) <= 5):
-            return {'error': 'Rating must be an integer between 1 and 5'}, 400
-
-        if not review_data.get('place_id'):
-            return {'error': 'Place ID is required'}, 400
-
-        # Vérifier si le lieu existe
-        place = place_facade.get_place(review_data['place_id'])
         if not place:
             return {'error': 'Place not found'}, 404
-
-        # Vérifier si l'utilisateur est propriétaire du lieu
         if str(place.owner_id) == str(current_user['id']):
             return {'error': 'Cannot review your own place'}, 403
+        if review_facade.get_review_by_user_and_place(current_user['id'], data['place_id']):
+            return {'error': 'You have already reviewed this place'}, 400
 
-        # Vérifier si l'utilisateur a déjà laissé un avis sur ce lieu
-        existing_review = review_facade.get_review_by_user_and_place(
-            current_user['id'], review_data['place_id']
-        )
-        if existing_review:
-            return {'error': 'You have already reviewed this place'}, 403
-
-        # Création de l'avis
-        review_data['user_id'] = current_user['id']
-        new_review = review_facade.create_review(review_data)
-
-        return {
-            'id': new_review.id,
-            'text': new_review.text,
-            'rating': new_review.rating,
-            'user_id': new_review.user_id,
-            'place_id': new_review.place_id
-        }, 201
+        data['user_id'] = current_user['id']
+        review = review_facade.create_review(data)
+        return review.to_dict(), 201 if review else {'error': 'Failed to create review'}, 400
 
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):

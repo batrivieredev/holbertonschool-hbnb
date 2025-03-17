@@ -8,7 +8,7 @@ Décorateurs disponibles:
     - rate_limit: Limite le nombre de requêtes
 """
 
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask import jsonify
 from functools import wraps
 
@@ -24,6 +24,7 @@ def admin_required(fn):
         function: Fonction décorée ou erreur 403
     """
     @wraps(fn)
+    @jwt_required()
     def wrapper(*args, **kwargs):
         current_user = get_jwt_identity()
         if not current_user.get('is_admin'):

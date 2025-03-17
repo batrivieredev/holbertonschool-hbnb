@@ -59,7 +59,7 @@ class PlaceFacade:
             price=place_data["price"],
             latitude=place_data["latitude"],
             longitude=place_data["longitude"],
-            owner= self.userfacade.get_user(place_data["owner_id"])  # Récupère l'utilisateur par son ID
+            owner_id= place_data["owner_id"]
         )
         if not place:
             print("Failed to create place.")
@@ -67,23 +67,32 @@ class PlaceFacade:
         return place  # Retourne l'objet Place créé
 
     def get_place(self, place_id):
-        """Récupère les détails complets d'un lieu.
+        """Retrieve complete place details with owner and amenities."""
+        print(f"🔍 Fetching place with ID: {place_id}")  # Debug log
 
-        Args:
-            place_id (str): Identifiant du lieu
-
-        Returns:
-            dict: Détails du lieu avec propriétaire et équipements
-                  ou None si non trouvé
-        """
         place = self.place_repo.get(place_id)
-        if place:
-            owner = self.userfacade.get_user(place.owner_id)  # Assure-toi que l'owner est un objet unique et pas une liste
-            amenities = [self.amenityfacade.get_amenity(amenity_id) for amenity_id in place.amenities]
-            return {
+
+        if not place:
+            print(f"❌ Place {place_id} not found in database")  # Debug log
+            return None  # ✅ Correct behavior
+
+        return place  # ✅ Return the `Place` model object instead of a dictionary
+
+
+    def get_all_places(self):
+        """Retrieve all places and attach owner details."""
+        places = self.place_repo.get_all()
+        if not places:
+            return []
+
+        result = []
+        for place in places:
+            owner = self.userfacade.get_user(place.owner_id)  # Fetch owner details
+
+            result.append({
                 'id': place.id,
-                'title': place.title,
                 'description': place.description,
+                'title': place.title,
                 'price': place.price,
                 'latitude': place.latitude,
                 'longitude': place.longitude,
@@ -92,28 +101,21 @@ class PlaceFacade:
                     'first_name': owner.first_name,
                     'last_name': owner.last_name,
                     'email': owner.email
-                } if owner else None,  # Vérifie si l'owner existe
+                } if owner else None,  # Ensure the owner exists
                 'amenities': [{
                     'id': amenity.id,
                     'name': amenity.name
-                } for amenity in amenities if amenity],  # Filtre les None
-            }
-        return None
+                } for amenity in place.amenities] if place.amenities else [],
+                'reviews': [{
+                    'id': review.id,
+                    'text': review.text,
+                    'rating': review.rating,
+                    'user_id': review.user_id
+                } for review in place.reviews] if place.reviews else []
+            })
 
-    def get_all_places(self):
-        """Récupère tous les lieux disponibles.
+        return result
 
-        Returns:
-            list[Place]: Liste des lieux ou liste vide si aucun
-
-        Notes:
-            Retourne une liste vide plutôt que None pour
-            faciliter le traitement côté API
-        """
-        places = self.place_repo.get_all()
-        if places is None:
-            return []
-        return places
 
     def update_place(self, place_id, place_data):
         """Met à jour un lieu existant.
@@ -134,7 +136,12 @@ class PlaceFacade:
             for key, value in place_data.items():
                 setattr(place, key, value)
             self.place_repo.update(place.id, place_data)
-        return place
+
+            print(f"✅ Update successful: {place.to_dict()}")  # Debug
+            return place.to_dict()
+
+        print("❌ Update failed!")
+        return None
 
     def delete_place(self, place_id):
         """Supprime un lieu.

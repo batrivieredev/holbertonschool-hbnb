@@ -3,6 +3,7 @@ from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services.UsersFacade import UsersFacade, is_valid_email
 from app.api.v1.decorators import admin_required
+from flask import request
 
 """
 Module gérant l'API des utilisateurs.
@@ -27,7 +28,8 @@ user_model = api.model('User', {
 
 user_update_model = api.model('UserUpdate', {
     'first_name': fields.String(description='Prénom'),
-    'last_name': fields.String(description='Nom')
+    'last_name': fields.String(description='Nom'),
+    'email': fields.String(description='Email')
 })
 
 facade = UsersFacade()  # Instance unique
@@ -69,14 +71,12 @@ class UserList(Resource):
             print("❌ Erreur lors de la création de l'utilisateur.")  # ✅ Debug
             return {'error': 'Invalid user data'}, 400
 
-
         return {
             'id': new_user.id,
             'first_name': new_user.first_name,
             'last_name': new_user.last_name,
             'email': new_user.email
         }, 201  # ✅ `201 Created` sans token JWT
-
 
     @api.response(200, 'List of users retrieved successfully')
     @jwt_required()  # ✅ Ajout de protection
@@ -94,7 +94,6 @@ class UserList(Resource):
             for user in users
         ], 200
 
-
 @api.route('/<string:user_id>')
 class UserResource(Resource):
     @api.response(200, 'User details retrieved successfully')
@@ -104,37 +103,56 @@ class UserResource(Resource):
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
-        return {
-            'id': user.id,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email
-        }, 200
+        return user.to_dict(), 200
 
     @api.doc(security='jwt')
     @jwt_required()
-    @admin_required
     @api.expect(user_update_model)
     @api.response(200, 'User updated successfully')
     @api.response(403, 'Unauthorized - Cannot modify other users')
+    @api.response(404, 'User not found')
     def put(self, user_id):
-        """Mettre à jour son propre profil (Nom et Prénom uniquement)"""
+        """Allow users to update their profile, and allow admins to update email"""
         current_user = get_jwt_identity()
+        is_admin = current_user.get('is_admin', False)
 
-        if str(user_id) != str(current_user.get('id')):
-            return {'error': 'Unauthorized - You can only modify your own profile'}, 403
-
-        user_data = api.payload
-        if 'email' in user_data or 'password' in user_data:
-            return {'error': 'Cannot modify email or password'}, 400
-
-        user = facade.update_user(user_id, user_data)
+        # Check if user exists
+        user = facade.get_user(user_id)
         if not user:
-            return {'error': 'User not found or invalid data'}, 404
+            return {'error': 'User not found'}, 404
 
-        return {
-            'id': user.id,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email
-        }, 200
+        data = request.json
+
+        # Restrict non-admin users from updating email or password
+        if 'password' in data:
+            return {'error': 'You cannot modify the password'}, 400
+        if 'email' in data and not is_admin:
+            return {'error': 'Only admins can modify the email'}, 403
+
+        # If admin updates email, validate it
+        if 'email' in data and is_admin:
+            new_email = data['email']
+            if not is_valid_email(new_email):
+                return {'error': 'Invalid email format'}, 400
+            if facade.get_user_by_email(new_email):
+                return {'error': 'Email already registered'}, 400
+
+        updated_user = facade.update_user(user_id, data)
+        if not updated_user:
+            return {'error': 'Update failed'}, 400
+
+        return updated_user.to_dict(), 200
+
+@api.route('/me')
+class UserMeResource(Resource):
+    @api.doc(security='jwt')
+    @jwt_required()
+    @api.response(200, 'User profile retrieved successfully')
+    @api.response(404, 'User not found')
+    def get(self):
+        """Retrieve the currently authenticated user's profile."""
+        current_user = get_jwt_identity()
+        user = facade.get_user(current_user['id'])
+        if not user:
+            return {'error': 'User not found'}, 404
+        return user.to_dict(), 200

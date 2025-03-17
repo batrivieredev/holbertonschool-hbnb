@@ -11,8 +11,8 @@ class TestUsersAPI(unittest.TestCase):
     def setUpClass(cls):
         """Créer un administrateur et récupérer un token JWT admin."""
         cls.admin_login = {
-            "email": "admin@hbnb.io",
-            "password": "admin1234"
+            "email": "admin2@hbnb.io",
+            "password": "admin12345"
         }
 
         cls.test_user = {
@@ -38,14 +38,20 @@ class TestUsersAPI(unittest.TestCase):
 
         # Création d'un utilisateur test (via admin)
         headers = {"Authorization": f"Bearer {cls.admin_token}"}
+
         response = requests.post(BASE_URL, json=cls.test_user, headers=headers)
         if response.status_code == 201:
             cls.user_id = response.json().get("id")
             print(f"✅ Utilisateur test créé avec ID : {cls.user_id}")
         else:
-            cls.user_id = None
             print(f"❌ Erreur création utilisateur test : {response.status_code} {response.text}")
             raise unittest.SkipTest("Impossible de créer l'utilisateur test.")
+
+        # 🔍 Debug: Fetch user from the API to verify it exists
+        get_user_response = requests.get(f"{BASE_URL}/{cls.user_id}", headers=headers)
+        print(f"📌 Vérification de l'utilisateur créé: {get_user_response.status_code} {get_user_response.text}")
+
+
 
     def test_1_get_all_users(self):
         """Test récupération de tous les utilisateurs (admin only)."""
@@ -118,30 +124,47 @@ class TestUsersAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 400, response.text)
 
     def test_8_update_user_with_email(self):
-        """Test de mise à jour de l'email (ce qui doit être autorisé pour un admin)."""
+        """Test email update (should be allowed for admin)."""
         headers = {"Authorization": f"Bearer {self.admin_token}"}
-        response = requests.put(f"{BASE_URL}/{self.user_id}", json={"email": "new.email@example.com"}, headers=headers)
+        response = requests.put(
+            f"{BASE_URL}/{self.user_id}", 
+            json={"email": "new.email@example.com"}, 
+            headers=headers
+        )
 
         print(f"📌 Réponse update email (admin): {response.status_code} {response.text}")
 
-        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.status_code, 200, response.text)  # ✅ Expect 200 instead of 400
+        self.assertEqual(response.json()["email"], "new.email@example.com")  # ✅ Ensure the email was updated
+
 
     def test_9_non_admin_cannot_update_user(self):
         """Test qu'un utilisateur normal ne peut pas modifier un autre utilisateur."""
+
+        # Debug: Print created test user
+        print(f"📌 Test User Created: {self.test_user}")
+
         user_login = {"email": self.test_user["email"], "password": self.test_user["password"]}
         user_response = requests.post(AUTH_URL, json=user_login)
 
+        # ✅ Debugging: Print login response
+        print(f"📌 Réponse login utilisateur normal: {user_response.status_code} {user_response.text}")
+
         if user_response.status_code == 200:
             user_token = user_response.json().get("access_token")
+            if not user_token:
+                self.skipTest("⚠️ Le token utilisateur est manquant dans la réponse.")
         else:
-            self.skipTest("⚠️ Impossible de récupérer le token utilisateur.")
+            self.skipTest("⚠️ Impossible de récupérer le token utilisateur. Erreur d'authentification.")
 
         headers = {"Authorization": f"Bearer {user_token}"}
         response = requests.put(f"{BASE_URL}/{self.admin_id}", json={"first_name": "Hack"}, headers=headers)
 
+        # ✅ Debugging: Print update response
         print(f"📌 Réponse update admin as normal user: {response.status_code} {response.text}")
 
         self.assertEqual(response.status_code, 403, response.text)
+
 
 if __name__ == "__main__":
     unittest.main()

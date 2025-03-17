@@ -14,19 +14,16 @@ Colonnes:
 
 from app.extensions import db
 from app.models.BaseModel import BaseModel
+import uuid
 
 class Amenity(BaseModel):
-    """Représente un équipement dans la base de données.
+    """Represents an amenity linked to a specific place."""
 
-    Attributes:
-        name (str): Nom de l'équipement, unique et obligatoire
-    """
-    __tablename__ = 'amenities'  # ✅ Define table name
+    __tablename__ = 'amenities'
 
-    name = db.Column(db.String(50),
-                    nullable=False,
-                    unique=True,
-                    comment="Nom unique de l'équipement, max 50 caractères")
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    place_id = db.Column(db.String(36), db.ForeignKey('places.id', ondelete="CASCADE"), nullable=False)
+    name = db.Column(db.String(255), nullable=False, unique=True)
 
     def __repr__(self):
-        return f"<Amenity {self.name}>"
+        return f"<Amenity {self.name}, Place ID: {self.place_id}>"

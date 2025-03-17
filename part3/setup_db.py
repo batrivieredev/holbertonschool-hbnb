@@ -57,20 +57,20 @@ def create_admin():
     app = create_app()
     with app.app_context():
         print("🔄 Vérification de l'admin dans la base de données...")
-        existing_admin = User.query.filter_by(email="admin@hbnb.io").first()
+        existing_admin = User.query.filter_by(email="admin2@hbnb.io").first()
         print(f"📌 Admin existant : {existing_admin}")
         if existing_admin:
             print(f"✅ Admin déjà présent : {existing_admin.email}")
             return
 
         print("🔄 Création de l'admin via SQLAlchemy...")
-        hashed_password = bcrypt.generate_password_hash("admin1234").decode("utf-8")  # ✅ Hash du mot de passe
+        hashed_password = bcrypt.generate_password_hash("admin12345").decode("utf-8")  # ✅ Hash du mot de passe
 
         admin = User(
-            id="36c9050e-ddd3-4c3b-9731-9f487208bbc1",
-            first_name="Admin",
-            last_name="HBnB",
-            email="admin@hbnb.io",
+            id="37c9050e-ddd3-4c3b-9731-9f487208bbc2",
+            first_name="Admin2",
+            last_name="HBnB0",
+            email="admin2@hbnb.io",
             password=hashed_password,  # ✅ On stocke le mot de passe hashé
             is_admin=True
         )

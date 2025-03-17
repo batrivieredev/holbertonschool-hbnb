@@ -37,7 +37,7 @@ class Review(BaseModel):
     text = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, nullable=False)
 
-    place = db.relationship('Place', backref='reviews', lazy=True)  # ✅ Define relationship
+    place = db.relationship('Place', back_populates='reviews', lazy=True)
     user = db.relationship('User', backref='reviews', lazy=True)  # ✅ Define relationship
 
     def __repr__(self):

@@ -59,11 +59,15 @@ class UsersFacade():
 
     def update_user(self, user_id, user_data):
         user = self.user_repo.get(user_id)
-        if user:
-            for key, value in user_data.items():
-                setattr(user, key, value)
-            self.user_repo.update(user.id, user_data)
+        if not user:
+            return None  # 🔹 Ensure this results in a `404`
+        
+        for key, value in user_data.items():
+            setattr(user, key, value)
+        
+        self.user_repo.update(user.id, user_data)
         return user
+
 
     def delete_user(self, user_id):
         return self.user_repo.delete(user_id)

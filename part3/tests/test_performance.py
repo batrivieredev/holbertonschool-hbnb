@@ -34,6 +34,7 @@ class TestPerformance(unittest.TestCase):
         try:
             start = time.time()
             response = requests.get(f"{BASE_URL}/places/", headers=self.headers)
+            print(f"réponse: {response}s")
             duration = time.time() - start
             self.assertLess(duration, 1.0)  # Max 1s en dev
             self.assertEqual(response.status_code, 200)
