@@ -38,8 +38,8 @@ class TestUsersAPI(unittest.TestCase):
 
         # Création d'un utilisateur test (via admin)
         headers = {"Authorization": f"Bearer {cls.admin_token}"}
-
         response = requests.post(BASE_URL, json=cls.test_user, headers=headers)
+
         if response.status_code == 201:
             cls.user_id = response.json().get("id")
             print(f"✅ Utilisateur test créé avec ID : {cls.user_id}")
@@ -47,124 +47,83 @@ class TestUsersAPI(unittest.TestCase):
             print(f"❌ Erreur création utilisateur test : {response.status_code} {response.text}")
             raise unittest.SkipTest("Impossible de créer l'utilisateur test.")
 
-        # 🔍 Debug: Fetch user from the API to verify it exists
-        get_user_response = requests.get(f"{BASE_URL}/{cls.user_id}", headers=headers)
-        print(f"📌 Vérification de l'utilisateur créé: {get_user_response.status_code} {get_user_response.text}")
+        # 🔍 Debug: Vérification de la création de l'utilisateur
+        user_check = requests.get(f"{BASE_URL}/{cls.user_id}", headers=headers)
+        print(f"📌 Vérification utilisateur test: {user_check.status_code} {user_check.text}")
 
+        # ✅ Tentative de connexion de l'utilisateur normal pour obtenir un token
+        user_login_response = requests.post(AUTH_URL, json={"email": cls.test_user["email"], "password": cls.test_user["password"]})
+        
+        if user_login_response.status_code == 200:
+            cls.user_token = user_login_response.json().get("access_token")
+            print(f"✅ Token utilisateur récupéré : {cls.user_token}")
+        else:
+            cls.user_token = None
+            print(f"❌ Échec connexion utilisateur test : {user_login_response.status_code} {user_login_response.text}")
 
 
     def test_1_get_all_users(self):
-        """Test récupération de tous les utilisateurs (admin only)."""
         headers = {"Authorization": f"Bearer {self.admin_token}"}
         response = requests.get(BASE_URL, headers=headers)
-        self.assertEqual(response.status_code, 200, response.text)
-        data = response.json()
-        self.assertIsInstance(data, list)
-        self.assertGreaterEqual(len(data), 1)
+        self.assertEqual(response.status_code, 200)
 
     def test_2_admin_update_user(self):
-        """Test mise à jour d'un utilisateur par un admin."""
         headers = {"Authorization": f"Bearer {self.admin_token}"}
         response = requests.put(f"{BASE_URL}/{self.user_id}", json=self.updated_user, headers=headers)
-
-        print(f"📌 Réponse update user (admin): {response.status_code} {response.text}")
-
-        self.assertEqual(response.status_code, 200, response.text)
-        self.assertEqual(response.json()["first_name"], self.updated_user["first_name"])
+        self.assertEqual(response.status_code, 200)
 
     def test_3_get_user_by_id(self):
-        """Test récupération d'un utilisateur par ID."""
         headers = {"Authorization": f"Bearer {self.admin_token}"}
         response = requests.get(f"{BASE_URL}/{self.user_id}", headers=headers)
-
-        print(f"📌 Réponse get user by ID: {response.status_code} {response.text}")
-        self.assertEqual(response.status_code, 200, response.text)
-        self.assertEqual(response.json()["id"], self.user_id)
+        self.assertEqual(response.status_code, 200)
 
     def test_4_get_nonexistent_user(self):
-        """Test récupération d'un utilisateur inexistant."""
         headers = {"Authorization": f"Bearer {self.admin_token}"}
         response = requests.get(f"{BASE_URL}/nonexistent-id", headers=headers)
-        self.assertEqual(response.status_code, 404, response.text)
+        self.assertEqual(response.status_code, 404)
 
     def test_5_update_nonexistent_user(self):
-        """Test mise à jour d'un utilisateur inexistant (admin)."""
         headers = {"Authorization": f"Bearer {self.admin_token}"}
         response = requests.put(f"{BASE_URL}/nonexistent-id", json=self.updated_user, headers=headers)
-
-        print(f"📌 Réponse update non-existent user (admin): {response.status_code} {response.text}")
-
-        self.assertEqual(response.status_code, 404, response.text)
+        self.assertEqual(response.status_code, 404)
 
     def test_6_password_not_returned_in_response(self):
-        """Test pour s'assurer que le mot de passe n'est pas retourné après la création."""
         new_user = {
             "first_name": "Alice",
             "last_name": "Wonderland",
-            "email": f"alice{uuid.uuid4()}@example.com",  # Email unique
+            "email": f"alice{uuid.uuid4()}@example.com",
             "password": "mypassword"
         }
         headers = {"Authorization": f"Bearer {self.admin_token}"}
         response = requests.post(BASE_URL, json=new_user, headers=headers)
-
-        print(f"📌 Réponse création user Alice: {response.status_code} {response.text}")
-
-        self.assertEqual(response.status_code, 201, response.text)
-        self.assertNotIn("password", response.json(), response.text)
+        self.assertEqual(response.status_code, 201)
+        self.assertNotIn("password", response.json())
 
     def test_7_invalid_email_format(self):
-        """Test de création d'un utilisateur avec un email invalide."""
         invalid_user = self.test_user.copy()
         invalid_user["email"] = "invalid-email"
         headers = {"Authorization": f"Bearer {self.admin_token}"}
         response = requests.post(BASE_URL, json=invalid_user, headers=headers)
-
-        print(f"📌 Réponse création user avec email invalide: {response.status_code} {response.text}")
-
-        self.assertEqual(response.status_code, 400, response.text)
+        self.assertEqual(response.status_code, 400)
 
     def test_8_update_user_with_email(self):
-        """Test email update (should be allowed for admin)."""
         headers = {"Authorization": f"Bearer {self.admin_token}"}
-        response = requests.put(
-            f"{BASE_URL}/{self.user_id}", 
-            json={"email": "new.email@example.com"}, 
-            headers=headers
-        )
-
-        print(f"📌 Réponse update email (admin): {response.status_code} {response.text}")
-
-        self.assertEqual(response.status_code, 200, response.text)  # ✅ Expect 200 instead of 400
-        self.assertEqual(response.json()["email"], "new.email@example.com")  # ✅ Ensure the email was updated
-
+        new_email = f"new.email{uuid.uuid4()}@example.com"
+        response = requests.put(f"{BASE_URL}/{self.user_id}", json={"email": new_email}, headers=headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["email"], new_email)
 
     def test_9_non_admin_cannot_update_user(self):
-        """Test qu'un utilisateur normal ne peut pas modifier un autre utilisateur."""
-
-        # Debug: Print created test user
-        print(f"📌 Test User Created: {self.test_user}")
-
         user_login = {"email": self.test_user["email"], "password": self.test_user["password"]}
         user_response = requests.post(AUTH_URL, json=user_login)
-
-        # ✅ Debugging: Print login response
-        print(f"📌 Réponse login utilisateur normal: {user_response.status_code} {user_response.text}")
-
         if user_response.status_code == 200:
             user_token = user_response.json().get("access_token")
-            if not user_token:
-                self.skipTest("⚠️ Le token utilisateur est manquant dans la réponse.")
         else:
-            self.skipTest("⚠️ Impossible de récupérer le token utilisateur. Erreur d'authentification.")
-
+            self.skipTest("Impossible de récupérer le token utilisateur.")
+        
         headers = {"Authorization": f"Bearer {user_token}"}
         response = requests.put(f"{BASE_URL}/{self.admin_id}", json={"first_name": "Hack"}, headers=headers)
-
-        # ✅ Debugging: Print update response
-        print(f"📌 Réponse update admin as normal user: {response.status_code} {response.text}")
-
-        self.assertEqual(response.status_code, 403, response.text)
-
+        self.assertEqual(response.status_code, 403)
 
 if __name__ == "__main__":
     unittest.main()

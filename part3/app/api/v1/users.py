@@ -112,35 +112,51 @@ class UserResource(Resource):
     @api.response(403, 'Unauthorized - Cannot modify other users')
     @api.response(404, 'User not found')
     def put(self, user_id):
-        """Allow users to update their profile, and allow admins to update email"""
+        """Allow users to update their profile, and allow admins to update email."""
         current_user = get_jwt_identity()
         is_admin = current_user.get('is_admin', False)
+        current_user_id = current_user.get('id')
+
+        print(f"📌 DEBUG: Current User: {current_user}")
+        print(f"📌 DEBUG: Target User ID: {user_id}")
 
         # Check if user exists
         user = facade.get_user(user_id)
         if not user:
+            print("❌ DEBUG: User not found in database.")
             return {'error': 'User not found'}, 404
 
+        print(f"✅ DEBUG: Found User: {user.to_dict()}")
+
         data = request.json
+        print(f"📌 DEBUG: Incoming Data: {data}")
 
         # Restrict non-admin users from updating email or password
         if 'password' in data:
+            print("❌ DEBUG: Password update attempted.")
             return {'error': 'You cannot modify the password'}, 400
-        if 'email' in data and not is_admin:
-            return {'error': 'Only admins can modify the email'}, 403
 
-        # If admin updates email, validate it
-        if 'email' in data and is_admin:
+        if 'email' in data:
+            if not is_admin:
+                print("❌ DEBUG: Non-admin attempted email update.")
+                return {'error': 'Only admins can modify the email'}, 403
+
             new_email = data['email']
             if not is_valid_email(new_email):
+                print("❌ DEBUG: Invalid email format provided.")
                 return {'error': 'Invalid email format'}, 400
+
             if facade.get_user_by_email(new_email):
+                print("❌ DEBUG: Email already in use.")
                 return {'error': 'Email already registered'}, 400
 
+        # Perform update
         updated_user = facade.update_user(user_id, data)
         if not updated_user:
+            print("❌ DEBUG: Update operation failed.")
             return {'error': 'Update failed'}, 400
 
+        print(f"✅ DEBUG: Successfully Updated User: {updated_user.to_dict()}")
         return updated_user.to_dict(), 200
 
 @api.route('/me')

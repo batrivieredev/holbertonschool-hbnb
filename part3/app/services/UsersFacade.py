@@ -3,6 +3,7 @@ from app.persistence.SQLAlchemyRepository import SQLAlchemyRepository
 import re
 from flask_bcrypt import Bcrypt
 from app.extensions import db
+from flask_bcrypt import check_password_hash
 
 bcrypt = Bcrypt()
 
@@ -50,8 +51,8 @@ class UsersFacade():
         return self.user_repo.get(user_id)
 
     def get_user_by_email(self, email):
-        user = self.user_repo.get_by_attribute('email', email)
-        return user if user else None
+        """Retrieve user by email."""
+        return User.query.filter_by(email=email).first()
 
     def get_all_users(self):
         """Récupérer tous les utilisateurs."""
@@ -61,13 +62,26 @@ class UsersFacade():
         user = self.user_repo.get(user_id)
         if not user:
             return None  # 🔹 Ensure this results in a `404`
-        
+
         for key, value in user_data.items():
             setattr(user, key, value)
-        
+
         self.user_repo.update(user.id, user_data)
         return user
 
 
     def delete_user(self, user_id):
         return self.user_repo.delete(user_id)
+
+    def verify_password(self, user, password):
+        """Verify if the provided password matches the stored hashed password."""
+        if not user:
+            return False
+        return check_password_hash(user.password, password)
+
+    def authenticate_user(self, email, password):
+        """Authenticate user and return user object if credentials are valid."""
+        user = self.get_user_by_email(email)
+        if user and self.verify_password(user, password):
+            return user
+        return None
