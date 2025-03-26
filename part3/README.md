@@ -1,5 +1,26 @@
 # HBNB API Project
 
+Une API RESTful moderne pour la gestion de locations de propriétés, inspirée par Airbnb.
+
+## Description
+
+HBNB API est une interface de programmation complète permettant de gérer des locations de propriétés, des utilisateurs, des avis et des commodités. Elle est construite avec Flask et utilise une architecture moderne basée sur SQLAlchemy pour la persistance des données.
+
+### Fonctionnalités Principales
+
+- 🏠 Gestion complète des propriétés (création, modification, suppression, recherche)
+- 👥 Système d'authentification et gestion des utilisateurs
+- ⭐ Système d'avis et de notations
+- 🛋️ Gestion des commodités pour les propriétés
+- 🔐 Sécurité JWT pour l'authentification
+- 📚 Documentation Swagger intégrée
+
+## Prérequis
+
+- Python 3.8+
+- PostgreSQL
+- pip
+
 ## Installation
 
 1. Installer python3-venv si ce n'est pas déjà fait :
@@ -7,40 +28,64 @@
 sudo apt-get install python3-venv
 ```
 
-2. Créer l'environnement virtuel :
+2. Cloner le repository :
+```bash
+git clone [url-du-repo]
+cd hbnb-api
+```
+
+3. Créer l'environnement virtuel :
 ```bash
 python3 -m venv venv
 ```
 
-3. Activer l'environnement virtuel :
+4. Activer l'environnement virtuel :
 ```bash
 source venv/bin/activate
 ```
 
-4. Installer les dépendances :
+5. Installer les dépendances :
 ```bash
 pip install -r requirements.txt
 ```
 
-5. Lancer l'application :
+6. Configurer les variables d'environnement :
 ```bash
-python3 run.py
+cp .env.example .env
+# Éditer .env avec vos configurations
+```
+
+7. Initialiser la base de données :
+```bash
+python setup_db.py
+```
+
+## Utilisation
+
+1. Lancer l'application :
+```bash
+python run.py
+```
+
+2. Accéder à l'interface Swagger :
+```
+http://localhost:5000/api/v1/
 ```
 
 ## Tests
 
 Pour exécuter les tests unitaires :
 ```bash
-python3 -m unittest tests/test_amenity_api.py
+# Exécuter tous les tests
+python -m unittest discover tests
+
+# Exécuter un test spécifique
+python -m unittest tests/test_amenity_api.py
 ```
 
-Note: Assurez-vous que l'environnement virtuel est activé avant d'exécuter les commandes.
-Pour désactiver l'environnement virtuel :
-```bash
-deactivate
-```
+## Structure de la Base de Données
 
-## Diagramme ER de la base de données
+Le projet utilise une base de données relationnelle avec le schéma suivant :
 
 ```mermaid
 erDiagram
@@ -88,10 +133,31 @@ erDiagram
         int amenity_id
     }
 
-    %% Relations (les clés étrangères sont gérées ici)
     USER ||--o{ PLACE : owns
     USER ||--o{ REVIEW : writes
     PLACE ||--o{ REVIEW : receives
     PLACE ||--o{ PLACE_AMENITY : has
     AMENITY ||--o{ PLACE_AMENITY : is_available_in
 ```
+
+## Architecture
+
+Le projet suit une architecture en couches :
+- API (app/api/) : Endpoints REST
+- Services (app/services/) : Logique métier
+- Models (app/models/) : Entités de données
+- Persistence (app/persistence/) : Couche d'accès aux données
+
+## Documentation
+
+Pour plus de détails sur l'utilisation de l'API, consultez le fichier GUIDE.md ou accédez à la documentation Swagger à l'adresse : `http://localhost:5000/api/v1/`.
+
+## Désactivation de l'environnement virtuel
+
+```bash
+deactivate
+```
+
+## Licence
+
+Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.

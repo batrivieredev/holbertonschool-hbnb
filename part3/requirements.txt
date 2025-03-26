@@ -1,24 +1,33 @@
 # Framework principal et extensions
 Flask==2.3.3
 Werkzeug==2.3.7
-flask-restx>=0.5.1  # Support API REST + Swagger
+flask-restx==0.5.1          # Support API REST + Swagger UI
 Flask-RESTful==0.3.9
-Flask-SQLAlchemy==2.5.1  # ORM SQL
-flask-migrate>=2.5.3  # Migrations de base de données
-flask-jwt-extended>=4.3.1  # Authentification JWT
-flask-bcrypt>=0.7.1  # Hachage des mots de passe
-
-# Utilitaires et outils
-python-dotenv==0.19.0  # Gestion des variables d'environnement - version spécifique
-requests==2.26.0  # Pour les tests HTTP
-pytest>=6.2.5  # Framework de test
-black>=21.5b2  # Formattage de code
-flake8>=3.9.2  # Linting de code
+Flask-SQLAlchemy==2.5.1     # ORM SQL
+Flask-Migrate==4.0.4        # Migrations de base de données
+Flask-JWT-Extended==4.5.2   # Authentification JWT
+Flask-Bcrypt==1.0.1        # Hachage des mots de passe
 
 # Base de données
 SQLAlchemy==1.4.23
-alembic>=1.6.5
+alembic==1.11.1
+psycopg2-binary==2.9.7     # Pilote PostgreSQL
+
+# Sécurité et authentification
+PyJWT==2.8.0
+bcrypt==4.0.1
+
+# Utilitaires et outils de développement
+python-dotenv==0.19.0      # Gestion des variables d'environnement
+requests==2.26.0           # Pour les tests HTTP
+pytest==7.4.0             # Framework de test
+black==23.7.0             # Formattage de code
+flake8==6.1.0             # Linting de code
+isort==5.12.0             # Tri des imports
 
 # Production
-gunicorn>=20.1.0  # Serveur WSGI pour la production
-gevent>=21.8.0  # Worker asynchrone pour Gunicorn
+gunicorn==20.1.0          # Serveur WSGI pour la production
+gevent==23.7.0            # Worker asynchrone pour Gunicorn
+
+# Performance et monitoring
+prometheus-flask-exporter==0.22.4  # Métriques pour Prometheus
