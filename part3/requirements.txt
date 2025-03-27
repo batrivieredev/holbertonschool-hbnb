@@ -1,8 +1,43 @@
-Flask==2.2.5
-Flask-RESTX==1.1.0
-Flask-JWT-Extended==4.5.2
-Flask-Bcrypt==1.0.1
-Flask-SQLAlchemy==3.1.1
-python-dotenv==1.0.1
-requests==2.31.0
-bcrypt==4.1.2
+# Framework principal et extensions
+Flask==2.3.3
+Werkzeug==2.3.7
+flask-restx==0.5.1          # Support API REST + Swagger UI
+Flask-RESTful==0.3.9
+Flask-SQLAlchemy==2.5.1     # ORM SQL
+Flask-Migrate==4.0.4        # Migrations de base de données
+Flask-JWT-Extended==4.5.2   # Authentification JWT
+Flask-Bcrypt==1.0.1         # Hachage des mots de passe
+
+# Base de données
+SQLAlchemy==1.4.23
+alembic==1.11.1
+pymysql==1.0.3              # Pilote MySQL
+psycopg2-binary==2.9.7      # Pilote PostgreSQL (si nécessaire)
+
+# Sécurité et authentification
+PyJWT==2.8.0
+bcrypt==4.0.1
+
+# Utilitaires et outils de développement
+python-dotenv==0.19.0       # Gestion des variables d'environnement
+requests==2.26.0            # Pour les tests HTTP
+pytest==7.4.0               # Framework de test
+unittest-xml-reporting==3.2.0  # Rapports XML pour unittest
+black==23.7.0               # Formattage de code
+flake8==6.1.0               # Linting de code
+isort==5.12.0               # Tri des imports
+psutil==5.9.5               # Monitoring des ressources système
+
+# Production
+gunicorn==20.1.0            # Serveur WSGI pour la production
+gevent==23.7.0              # Worker asynchrone pour Gunicorn
+
+# Performance et monitoring
+prometheus-flask-exporter==0.22.4  # Métriques pour Prometheus
+
+# Tests et couverture
+coverage==7.2.7             # Mesure de la couverture de tests
+pytest-cov==4.1.0           # Couverture de tests avec pytest
+
+# Swagger et documentation
+flasgger==0.9.5             # Documentation Swagger pour Flask
