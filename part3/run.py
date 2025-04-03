@@ -11,16 +11,19 @@ Options:
 
 import sys
 from app import create_app
-from setup_db import reset_database
-from setup_db import create_admin, reset_database
-
-# Vérifie si --reset-db est passé en argument
-# reset_database()
+from setup_db import reset_database, create_admin
 
 # Créer l'application avec la configuration par défaut
 app = create_app()
-# reset_database()
-# create_admin()
+
+# Réinitialiser la base de données et créer un administrateur
+print("🔄 Réinitialisation de la base de données...")
+reset_database()
+print("✅ Base de données réinitialisée avec succès.")
+
+print("🔄 Création de l'administrateur...")
+create_admin()
+print("✅ Administrateur créé avec succès.")
 
 if __name__ == '__main__':
     print("🚀 Serveur en cours d'exécution sur http://localhost:5000/")

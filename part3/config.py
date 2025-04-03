@@ -13,9 +13,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Configuration spécifique à l'environnement de développement."""
     SECRET_KEY = os.getenv("SECRET_KEY", "my_super_secret_key")
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL", "mysql+pymysql://debian-sys-maint:fB33r9vNp0V8hA8M@localhost/hbnb_db"
-    )
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///hbnb.db")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "supersecretjwtkey")
     DEBUG = True
 
