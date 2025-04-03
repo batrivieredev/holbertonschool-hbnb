@@ -157,7 +157,3 @@ Pour plus de détails sur l'utilisation de l'API, consultez le fichier GUIDE.md 
 ```bash
 deactivate
 ```
-
-## Licence
-
-Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
