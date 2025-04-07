@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBnB - Locations de vacances</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">
+                <div class="logo-icon">H</div>
+                <span class="logo-text">HBnB</span>
+            </a>
+            <nav class="nav-links">
+                <select id="price-filter">
+                    <option value="all">Tous les prix</option>
+                    <option value="100">Moins de 100€</option>
+                    <option value="200">Moins de 200€</option>
+                    <option value="300">Moins de 300€</option>
+                </select>
+                <a href="/" class="nav-link">Accueil</a>
+                <a href="/login.html" class="nav-link" id="login-link">Connexion</a>
+                <button class="nav-link" id="logout-button" style="display: none;">Déconnexion</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <h1>Découvrez des logements uniques</h1>
+        <section class="filter-section">
+            <h2>Filtrer par prix</h2>
+            <p>Trouvez le logement parfait dans votre budget</p>
+        </section>
+
+        <section class="places-grid" id="places-list">
+            <!-- Places will be dynamically inserted here -->
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 HBnB - Tous droits réservés</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+Résumé des modifications et ajouts effectués
+
+1. Fichier UsersFacade.py (Business Logic Layer)
+
+Correction de l'erreur TypeError: UsersFacade.get_user_by_email() missing 1 required positional argument: 'email' en ajoutant self dans l'appel de la méthode.
+Implémentation de get_all_users() pour récupérer la liste des utilisateurs.
+
+Ajout de update_user() pour mettre à jour les informations d'un utilisateur.
+
+2. Fichier HBnBFacade.py (Base Facade Layer)
+
+Ajout des méthodes abstraites get_all_users() et update_user() pour s'assurer que toutes les classes enfants les implémentent.
+Suppression de la méthode create_user() en double qui était définie deux fois.
+
+3. Fichier users_api.py (Presentation Layer - API)
+
+Correction des erreurs d'instanciation en utilisant UsersFacade() correctement.
+Modification de get_user_by_email() pour être appelé sur une instance.
+Ajout du point d'accès GET /api/v1/users/ pour récupérer tous les utilisateurs.
+Ajout du point d'accès PUT /api/v1/users/<user_id> pour mettre à jour un utilisateur.
+
+4. Fichier test_users_api.py (Tests Unitaires)
+
+Ajout des tests pour GET /api/v1/users/ et PUT /api/v1/users/<user_id>.
+Correction des erreurs de test liées aux erreurs d'appel de méthodes.
+Ajout de tests de validation pour l'unicité des emails.
+
+Améliorations Générales
+
+Meilleure gestion des erreurs HTTP (400, 404) avec des messages plus explicites.
+Refactoring du code pour une meilleure lisibilité et maintenabilité.
+Ajout de commentaires explicatifs dans les fichiers.
