@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMessage.textContent = '';
 
         try {
-            const response = await fetch('http://localhost:5000/api/v1/auth/login', {
+            const response = await fetch('http://localhost:5001/api/v1/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -31,8 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 // Store token in cookie
                 document.cookie = `token=${data.access_token}; path=/; max-age=3600`;
-                // Redirect to main page
-                window.location.href = 'index.html';
+                // Redirect to admin page if user is admin, otherwise to main page
+                if (data.user && data.user.is_admin) {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
             } else {
                 errorMessage.textContent = data.message || 'Invalid email or password';
             }

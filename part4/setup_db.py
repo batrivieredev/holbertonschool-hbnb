@@ -4,54 +4,71 @@ from sqlalchemy import text
 from app.models.user import User
 from app.extensions import db, bcrypt
 
-SQL_SCRIPT_PATH = "hbnb_schema.sql"
+def ensure_app_directory():
+    """Create app directory if it doesn't exist and ensure it's writable."""
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    os.makedirs(current_dir, exist_ok=True)
+    print(f"✅ Directory ready at {current_dir}")
+    return current_dir
 
-def reset_database():
-    """Réinitialise la base de données SQLite."""
-    print("🔄 Réinitialisation de la base de données SQLite...")
-    db_path = os.getenv("DATABASE_URL", "sqlite:///hbnb.db").replace("sqlite:///", "")
-
-    # Supprimer l'ancienne base de données si elle existe
-    if os.path.exists(db_path):
-        os.remove(db_path)
-        print(f"🗑️ Base de données supprimée : {db_path}")
+def init_database():
+    """Initialize the database if it doesn't exist."""
+    print("🔄 Checking database...")
+    db_dir = ensure_app_directory()
+    db_file = os.path.join(db_dir, 'hbnb.db')
 
     app = create_app()
     with app.app_context():
-        db.create_all()  # Crée les tables définies dans les modèles
-        print("✅ Tables créées avec succès.")
+        if not os.path.exists(db_file):
+            print("📁 Creating new database...")
+            db.create_all()
+            print("✅ Tables created successfully.")
 
-        # Exécuter le script SQL pour insérer des données initiales
+            # Execute SQL script for initial setup if needed
+            try:
+                with open('hbnb_schema.sql', 'r') as sql_file:
+                    sql_commands = sql_file.read().split(";")
+                    for command in sql_commands:
+                        if command.strip():
+                            db.session.execute(text(command.strip()))
+                    db.session.commit()
+                print("✅ Initial database setup completed.")
+            except Exception as e:
+                print(f"❌ Error during SQL script execution: {e}")
+        else:
+            print("✅ Database already exists.")
+
+def reset_database():
+    """Reset the database (only when explicitly called)."""
+    print("🔄 Resetting database...")
+    db_dir = ensure_app_directory()
+    db_file = os.path.join(db_dir, 'hbnb.db')
+
+    if os.path.exists(db_file):
+        os.remove(db_file)
+        print(f"🗑️ Old database removed: {db_file}")
+
+    app = create_app()
+    with app.app_context():
         try:
-            with open(SQL_SCRIPT_PATH, "r") as sql_file:
+            db.create_all()
+            print("✅ Tables created successfully.")
+
+            with open('hbnb_schema.sql', 'r') as sql_file:
                 sql_commands = sql_file.read().split(";")
                 for command in sql_commands:
                     if command.strip():
                         db.session.execute(text(command.strip()))
                 db.session.commit()
-            print("✅ Données initiales insérées avec succès.")
+            print("✅ Database reset completed.")
         except Exception as e:
-            print(f"❌ ERREUR LORS DE L'EXÉCUTION DU SCRIPT SQL : {e}")
+            db.session.rollback()
+            print(f"❌ Error during database setup: {e}")
+            raise
 
-def create_admin():
-    """Ajoute un administrateur si inexistant avec un mot de passe hashé."""
-    print("🔄 Initialisation de l'admin...")
-    app = create_app()
-    with app.app_context():
-        existing_admin = User.query.filter_by(email="admin@hbnb.io").first()
-        if existing_admin:
-            print(f"✅ Admin déjà présent : {existing_admin.email}")
-            return
-
-        hashed_password = bcrypt.generate_password_hash("admin12345").decode("utf-8")
-        admin = User(
-            id="37c9050e-ddd3-4c3b-9731-9f487208bbc2",
-            first_name="Admin",
-            last_name="HBnB",
-            email="admin@hbnb.io",
-            password=hashed_password,
-            is_admin=True
-        )
-        db.session.add(admin)
-        db.session.commit()
-        print("✅ Admin créé avec succès !")
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == '--reset':
+        reset_database()
+    else:
+        init_database()

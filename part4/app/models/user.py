@@ -1,10 +1,5 @@
 #!/usr/bin/python3
 
-from app.extensions import db
-from app.models.BaseModel import BaseModel
-from flask_bcrypt import Bcrypt, generate_password_hash
-
-
 """
 Modèle SQLAlchemy pour les utilisateurs.
 Définit la structure de données et les méthodes des comptes.
@@ -15,10 +10,9 @@ Relations:
     - reviews: Avis postés par l'utilisateur
 """
 
-bcrypt = Bcrypt()
-
 from app.extensions import db, bcrypt
 from app.models.BaseModel import BaseModel
+from datetime import datetime
 
 class User(BaseModel):
     """User Model with password hashing"""
@@ -45,5 +39,7 @@ class User(BaseModel):
             "first_name": self.first_name,
             "last_name": self.last_name,
             "email": self.email,
-            "is_admin": self.is_admin
+            "is_admin": self.is_admin,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None
         }

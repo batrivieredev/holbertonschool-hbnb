@@ -8,23 +8,33 @@ Usage:
 Options:
     --reset-db : Réinitialiser la base de données avant de démarrer
 """
-
-import sys
+#!/usr/bin/env python3
+import argparse
+import os
+from flask import send_from_directory
 from app import create_app
-from setup_db import reset_database, create_admin
+from setup_db import init_database, reset_database
 
-# Créer l'application avec la configuration par défaut
-app = create_app()
+def main():
+    parser = argparse.ArgumentParser(description="Lance l'application Flask.")
+    parser.add_argument('--reset-db', action='store_true', help="Réinitialiser la base de données avant de démarrer")
+    args = parser.parse_args()
 
-# Réinitialiser la base de données et créer un administrateur
-print("🔄 Réinitialisation de la base de données...")
-reset_database()
-print("✅ Base de données réinitialisée avec succès.")
 
-print("🔄 Création de l'administrateur...")
-create_admin()
-print("✅ Administrateur créé avec succès.")
+    # Créer l'application avec la configuration par défaut
+    app = create_app()
+
+    # Routes pour servir les fichiers statiques
+    @app.route('/css/<path:filename>')
+    def serve_css(filename):
+        return send_from_directory(os.path.join(app.root_path, '../static/css'), filename)
+
+    @app.route('/js/<path:filename>')
+    def serve_js(filename):
+        return send_from_directory(os.path.join(app.root_path, '../static/js'), filename)
+
+    print("🚀 Serveur en cours d'exécution sur http://localhost:5001/")
+    app.run(debug=True, host='0.0.0.0', port=5001)
 
 if __name__ == '__main__':
-    print("🚀 Serveur en cours d'exécution sur http://localhost:5000/")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    main()

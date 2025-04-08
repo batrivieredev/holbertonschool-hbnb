@@ -16,6 +16,7 @@ Fonctionnalités:
 
 class BaseModel(db.Model):
     """Classe de base abstraite pour tous les modèles.
+    Hérite de db.Model pour fournir la fonctionnalité SQLAlchemy.
 
     Attributes:
         id (str): Identifiant unique UUID v4

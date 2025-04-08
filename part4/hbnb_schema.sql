@@ -62,10 +62,6 @@ CREATE TABLE IF NOT EXISTS place_amenity (
     FOREIGN KEY (amenity_id) REFERENCES amenities(id)
 );
 
--- Insertion des données initiales dans la table User
-INSERT INTO users (id, first_name, last_name, email, password, is_admin) VALUES
-    ('36c9050e-ddd3-4c3b-9731-9f487208bbc1', 'Admin', 'HBnB', 'admin@hbnb.io',
-    '$2b$12$zYlf3H2L9D1R8rTc99lC2uLfB4XflbJFtANjFHvkjy1K7U5TAFDDG', TRUE);
 
 -- Insertion des équipements initiaux dans la table Amenity
 INSERT INTO amenities (id, name) VALUES

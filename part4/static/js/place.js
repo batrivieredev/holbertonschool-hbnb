@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const token = getCookie('token');
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-            const response = await fetch(`http://localhost:5000/api/v1/places/${placeId}`, {
+            const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}`, {
                 headers: {
                     ...headers,
                     'Content-Type': 'application/json'
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const token = getCookie('token');
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-            const response = await fetch(`http://localhost:5000/api/v1/places/${placeId}/reviews`, {
+            const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}/reviews`, {
                 headers: {
                     ...headers,
                     'Content-Type': 'application/json'
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const response = await fetch(`http://localhost:5000/api/v1/places/${placeId}/reviews`, {
+            const response = await fetch(`http://localhost:5001/api/v1/places/${placeId}/reviews`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

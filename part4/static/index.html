@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HBnB - Locations de vacances</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>HBnB - Accueil</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header>
@@ -14,28 +14,27 @@
                 <span class="logo-text">HBnB</span>
             </a>
             <nav class="nav-links">
-                <select id="price-filter">
-                    <option value="all">Tous les prix</option>
-                    <option value="100">Moins de 100€</option>
-                    <option value="200">Moins de 200€</option>
-                    <option value="300">Moins de 300€</option>
-                </select>
                 <a href="/" class="nav-link">Accueil</a>
-                <a href="/login.html" class="nav-link" id="login-link">Connexion</a>
-                <button class="nav-link" id="logout-button" style="display: none;">Déconnexion</button>
+                <a href="/create-place.html" id="create-place-link" class="nav-link" style="display: none;">Créer une annonce</a>
+                <a href="/login.html" id="login-link" class="nav-link">Connexion</a>
+                <button id="logout-button" class="button" style="display: none;">Déconnexion</button>
             </nav>
         </div>
     </header>
 
     <main>
-        <h1>Découvrez des logements uniques</h1>
         <section class="filter-section">
             <h2>Filtrer par prix</h2>
-            <p>Trouvez le logement parfait dans votre budget</p>
+            <select id="price-filter" class="price-filter">
+                <option value="all">Tous les prix</option>
+                <option value="50">Moins de 50€</option>
+                <option value="100">Moins de 100€</option>
+                <option value="200">Moins de 200€</option>
+            </select>
         </section>
 
-        <section class="places-grid" id="places-list">
-            <!-- Places will be dynamically inserted here -->
+        <section id="places-list" class="places-grid">
+            <!-- Places will be displayed here -->
         </section>
     </main>
 
@@ -45,6 +44,6 @@
         </div>
     </footer>
 
-    <script src="/static/js/index.js"></script>
+    <script src="/js/index.js"></script>
 </body>
 </html>

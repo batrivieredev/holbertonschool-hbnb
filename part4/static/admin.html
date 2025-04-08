@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBnB - Administration</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">
+                <div class="logo-icon">H</div>
+                <span class="logo-text">HBnB</span>
+            </a>
+            <nav class="nav-links">
+                <a href="/" class="nav-link">Accueil</a>
+                <button id="logout-button" class="button">Déconnexion</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="admin-container">
+            <h1>Panneau d'administration</h1>
+
+            <section class="admin-section">
+                <h2>Créer un utilisateur</h2>
+                <form id="create-user-form" class="admin-form">
+                    <div class="form-group">
+                        <label for="first-name">Prénom</label>
+                        <input type="text" id="first-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Nom</label>
+                        <input type="text" id="last-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="is-admin">
+                            Administrateur
+                        </label>
+                    </div>
+                    <div id="error-message" class="error-message"></div>
+                    <button type="submit" class="button">Créer l'utilisateur</button>
+                </form>
+            </section>
+
+            <section class="admin-section">
+                <h2>Liste des utilisateurs</h2>
+                <div id="users-list" class="users-list">
+                    <!-- Users will be displayed here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 HBnB - Tous droits réservés</p>
+        </div>
+    </footer>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

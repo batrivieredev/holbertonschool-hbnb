@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const priceFilter = document.getElementById('price-filter');
     const loginLink = document.getElementById('login-link');
     const logoutButton = document.getElementById('logout-button');
+    const createPlaceLink = document.getElementById('create-place-link');
 
     let places = [];
 
@@ -12,9 +13,32 @@ document.addEventListener('DOMContentLoaded', () => {
         if (token) {
             loginLink.style.display = 'none';
             logoutButton.style.display = 'block';
+            createPlaceLink.style.display = 'block';
+            fetchUserProfile(token);
+
+            // Check if user is admin from profile response and show admin link
+            fetch('http://localhost:5001/api/v1/auth/profile', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(userData => {
+                if (userData.is_admin) {
+                    const adminLink = document.createElement('a');
+                    adminLink.href = 'admin.html';
+                    adminLink.className = 'nav-link';
+                    adminLink.textContent = 'Admin Panel';
+                    const navRight = document.querySelector('.nav-right');
+                    navRight.insertBefore(adminLink, logoutButton);
+                }
+            })
+            .catch(console.error);
         } else {
             loginLink.style.display = 'block';
             logoutButton.style.display = 'none';
+            createPlaceLink.style.display = 'none';
         }
     }
 
@@ -24,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const token = getCookie('token');
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-            const response = await fetch('http://localhost:5000/api/v1/places', {
+            const response = await fetch('http://localhost:5001/api/v1/places', {
                 headers: {
                     ...headers,
                     'Content-Type': 'application/json'
@@ -59,6 +83,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
         `).join('');
+    }
+
+    // Fetch user profile
+    async function fetchUserProfile(token) {
+        try {
+            const response = await fetch('http://localhost:5001/api/v1/auth/profile', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch user profile');
+            }
+            const userData = await response.json();
+            // Store user data if needed
+            console.log('User profile:', userData);
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+            // Handle error (e.g., invalid token)
+            logout();
+        }
     }
 
     // Handle logout
