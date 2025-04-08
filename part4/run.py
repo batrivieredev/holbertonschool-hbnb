@@ -21,17 +21,21 @@ def main():
     parser.add_argument('--reset-db', action='store_true', help="Réinitialiser la base de données avant de démarrer")
     args = parser.parse_args()
 
+    # Crée l'application avec la configuration par défaut
+    app = create_app()
+
     if args.reset_db:
         print("🔄 Réinitialisation de la base de données...")
-        reset_database()
-        print("✅ Base de données réinitialisée avec succès.")
-        # Create admin user after database reset
-        create_admin()
+        with app.app_context():
+            reset_database()
+            print("✅ Base de données réinitialisée avec succès.")
+            # Create admin user after database reset
+            create_admin()
     else:
-        init_database()
-
-    # Créer l'application avec la configuration par défaut
-    app = create_app()
+        with app.app_context():
+            init_database()
+            # Ensure admin exists even without reset
+            create_admin()
 
     # Routes pour servir les fichiers statiques
     @app.route('/css/<path:filename>')

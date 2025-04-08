@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HBnB - Administration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -14,48 +18,68 @@
                 <span class="logo-text">HBnB</span>
             </a>
             <nav class="nav-links">
-                <a href="/" class="nav-link">Accueil</a>
-                <button id="logout-button" class="button">Déconnexion</button>
+                <a href="/" class="nav-link">
+                    <span class="icon">🏠</span> Accueil
+                </a>
+                <button id="logout-button" class="button">
+                    <span class="icon">🚪</span> Déconnexion
+                </button>
             </nav>
         </div>
     </header>
 
     <main>
         <div class="admin-container">
-            <h1>Panneau d'administration</h1>
+            <h1>
+                <span class="icon">⚙️</span> Panneau d'administration
+            </h1>
 
             <section class="admin-section">
-                <h2>Créer un utilisateur</h2>
+                <h2>
+                    <span class="icon">👥</span> Créer un utilisateur
+                </h2>
                 <form id="create-user-form" class="admin-form">
                     <div class="form-group">
-                        <label for="first-name">Prénom</label>
+                        <label for="first-name">
+                            <span class="icon">📝</span> Prénom
+                        </label>
                         <input type="text" id="first-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="last-name">Nom</label>
+                        <label for="last-name">
+                            <span class="icon">📝</span> Nom
+                        </label>
                         <input type="text" id="last-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="email">Email</label>
+                        <label for="email">
+                            <span class="icon">📧</span> Email
+                        </label>
                         <input type="email" id="email" required>
                     </div>
                     <div class="form-group">
-                        <label for="password">Mot de passe</label>
+                        <label for="password">
+                            <span class="icon">🔑</span> Mot de passe
+                        </label>
                         <input type="password" id="password" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group checkbox-group">
                         <label>
                             <input type="checkbox" id="is-admin">
-                            Administrateur
+                            <span class="icon">👨‍💼</span> Administrateur
                         </label>
                     </div>
                     <div id="error-message" class="error-message"></div>
-                    <button type="submit" class="button">Créer l'utilisateur</button>
+                    <button type="submit" class="button">
+                        <span class="icon">➕</span> Créer l'utilisateur
+                    </button>
                 </form>
             </section>
 
             <section class="admin-section">
-                <h2>Liste des utilisateurs</h2>
+                <h2>
+                    <span class="icon">📋</span> Liste des utilisateurs
+                </h2>
                 <div id="users-list" class="users-list">
                     <!-- Users will be displayed here -->
                 </div>
@@ -65,7 +89,12 @@
 
     <footer>
         <div class="footer-content">
-            <p>&copy; 2025 HBnB - Tous droits réservés</p>
+            <p>© 2025 HBnB - Tous droits réservés</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">À propos</a>
+                <a href="#" class="footer-link">Conditions d'utilisation</a>
+                <a href="#" class="footer-link">Confidentialité</a>
+            </div>
         </div>
     </footer>
 

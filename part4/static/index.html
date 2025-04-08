@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HBnB - Accueil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -14,10 +18,16 @@
                 <span class="logo-text">HBnB</span>
             </a>
             <nav class="nav-links">
-                <a href="/" class="nav-link">Accueil</a>
-                <a href="/create-place.html" id="create-place-link" class="nav-link" style="display: none;">Créer une annonce</a>
-                <a href="/login.html" id="login-link" class="nav-link">Connexion</a>
-                <button id="logout-button" class="button" style="display: none;">Déconnexion</button>
+                <a href="/" class="nav-link active">Accueil</a>
+                <a href="/create-place.html" id="create-place-link" class="nav-link" style="display: none;">
+                    <span class="icon">📝</span> Créer une annonce
+                </a>
+                <a href="/login.html" id="login-link" class="nav-link">
+                    <span class="icon">👤</span> Connexion
+                </a>
+                <button id="logout-button" class="button" style="display: none;">
+                    <span class="icon">🚪</span> Déconnexion
+                </button>
             </nav>
         </div>
     </header>
@@ -40,7 +50,12 @@
 
     <footer>
         <div class="footer-content">
-            <p>&copy; 2025 HBnB - Tous droits réservés</p>
+            <p>© 2025 HBnB - Tous droits réservés</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">À propos</a>
+                <a href="#" class="footer-link">Conditions d'utilisation</a>
+                <a href="#" class="footer-link">Confidentialité</a>
+            </div>
         </div>
     </footer>
 
