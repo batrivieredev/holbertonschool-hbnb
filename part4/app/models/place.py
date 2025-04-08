@@ -1,8 +1,6 @@
 from app.extensions import db
 from app.models.BaseModel import BaseModel
-from app.models.user import User  # ✅ Import User model
-from sqlalchemy.dialects.mysql import CHAR
-import uuid
+from app.models.user import User
 
 class Place(BaseModel):
     """Représente un lieu dans la base de données."""
@@ -19,7 +17,6 @@ class Place(BaseModel):
     owner = db.relationship('User', backref='places')
 
     # ✅ Existing relationships
-    amenities = db.relationship('Amenity', backref='place', cascade='all, delete')
     reviews = db.relationship('Review', back_populates='place', cascade='all, delete')
 
     def to_dict(self):
@@ -40,7 +37,6 @@ class Place(BaseModel):
                 'last_name': self.owner.last_name,
                 'email': self.owner.email
             } if self.owner else None,
-            'amenities': [amenity.to_dict() for amenity in self.amenities] if self.amenities else [],
             'reviews': [review.to_dict() for review in self.reviews] if self.reviews else []
         }
 

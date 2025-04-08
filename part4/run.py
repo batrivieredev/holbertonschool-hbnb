@@ -14,12 +14,21 @@ import os
 from flask import send_from_directory
 from app import create_app
 from setup_db import init_database, reset_database
+from create_admin import create_admin
 
 def main():
     parser = argparse.ArgumentParser(description="Lance l'application Flask.")
     parser.add_argument('--reset-db', action='store_true', help="Réinitialiser la base de données avant de démarrer")
     args = parser.parse_args()
 
+    if args.reset_db:
+        print("🔄 Réinitialisation de la base de données...")
+        reset_database()
+        print("✅ Base de données réinitialisée avec succès.")
+        # Create admin user after database reset
+        create_admin()
+    else:
+        init_database()
 
     # Créer l'application avec la configuration par défaut
     app = create_app()
