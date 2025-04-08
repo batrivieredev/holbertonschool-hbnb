@@ -28,11 +28,12 @@ class Place(BaseModel):
     # Relationships
     owner = db.relationship('User', backref='places')
     reviews = db.relationship('Review', back_populates='place', cascade='all, delete')
+    photos = db.relationship('PlacePhoto', back_populates='place', cascade='all, delete')
     amenities = db.relationship('Amenity',
-                              secondary=place_amenity,
-                              lazy='dynamic',
-                              cascade='all, delete',
-                              backref=db.backref('places', lazy='dynamic'))
+                               secondary=place_amenity,
+                               lazy='dynamic',
+                               cascade='all, delete',
+                               backref=db.backref('places', lazy='dynamic'))
 
     def validate(self):
         """Validate place attributes."""
@@ -63,6 +64,9 @@ class Place(BaseModel):
 
         # Add reviews
         place_dict['reviews'] = [review.to_dict() for review in self.reviews] if self.reviews else []
+
+        # Add photos
+        place_dict['photos'] = [photo.to_dict() for photo in self.photos] if self.photos else []
 
         # Add amenities
         place_dict['amenities'] = [amenity.to_dict() for amenity in self.amenities.all()] if self.amenities else []
@@ -100,6 +104,27 @@ class Place(BaseModel):
             if field in data:
                 setattr(self, field, data[field])
 
+        # Handle photos
+        if 'photos' in data and isinstance(data['photos'], list):
+            from app.models.place_photo import PlacePhoto
+            # Update existing photos
+            for photo_data in data['photos']:
+                if 'id' in photo_data:
+                    photo = PlacePhoto.query.get(photo_data['id'])
+                    if photo and photo.place_id == self.id:
+                        photo.photo_url = photo_data.get('photo_url', photo.photo_url)
+                        photo.caption = photo_data.get('caption', photo.caption)
+                        photo.is_primary = photo_data.get('is_primary', photo.is_primary)
+                else:
+                    # Add new photo
+                    photo = PlacePhoto(
+                        place_id=self.id,
+                        photo_url=photo_data['photo_url'],
+                        caption=photo_data.get('caption'),
+                        is_primary=photo_data.get('is_primary', False)
+                    )
+                    self.photos.append(photo)
+
         # Handle amenities
         if 'amenities' in data and isinstance(data['amenities'], list):
             from app.models.amenity import Amenity
@@ -128,6 +153,18 @@ class Place(BaseModel):
         )
         place.validate()
         place.save()
+
+        # Handle photos
+        if 'photos' in data and isinstance(data['photos'], list):
+            from app.models.place_photo import PlacePhoto
+            for photo_data in data['photos']:
+                photo = PlacePhoto(
+                    place_id=place.id,
+                    photo_url=photo_data['photo_url'],
+                    caption=photo_data.get('caption'),
+                    is_primary=photo_data.get('is_primary', False)
+                )
+                place.photos.append(photo)
 
         # Handle amenities
         if 'amenities' in data and isinstance(data['amenities'], list):

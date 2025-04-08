@@ -1,118 +1,168 @@
-/* Styles spécifiques à la page d'accueil */
+/* Conteneur principal */
+.content {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
 
 /* Filtres */
 .filters {
+    background: white;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
-    display: flex;
-    justify-content: flex-end;
 }
 
 .price-filter {
     display: flex;
     align-items: center;
     gap: 1rem;
-    background-color: white;
-    padding: 0.75rem 1rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
 }
 
-.price-filter label {
-    font-weight: 500;
-    color: var(--secondary-color);
-    margin: 0;
+.price-filter input[type="range"] {
+    flex: 1;
 }
 
-.price-filter select {
-    padding: 0.5rem;
-    border-radius: var(--border-radius);
-    border: 1px solid #ddd;
-    font-family: inherit;
-    background-color: white;
-    min-width: 150px;
-    cursor: pointer;
+#price-value {
+    min-width: 60px;
 }
 
-.price-filter select:focus {
-    border-color: var(--primary-color);
-    outline: none;
-}
-
-/* Grille des logements */
-.places-container {
-    margin-top: 2rem;
-}
-
-.places-container h1 {
-    margin-bottom: 2rem;
-    color: var(--secondary-color);
-    font-size: 2rem;
-}
-
+/* Liste des lieux */
 .places-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 2rem;
 }
 
-/* Carte de logement */
+/* Carte d'un lieu */
 .place-card {
-    background-color: white;
+    background: white;
     border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
 }
 
 .place-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.place-image-container {
-    background-color: #eee;
-    padding-top: 60%;
+/* Image du lieu */
+.place-card-image {
+    width: 100%;
+    height: 200px;
     position: relative;
+    overflow: hidden;
 }
 
-.place-image-placeholder {
-    position: absolute;
-    top: 0;
-    left: 0;
+.place-card-image img {
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.place-card:hover .place-card-image img {
+    transform: scale(1.05);
+}
+
+.place-card-image.placeholder {
+    background: #f8f9fa;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.placeholder-icon {
     font-size: 3rem;
-    color: var(--secondary-color);
+    color: #dee2e6;
 }
 
+/* Contenu de la carte */
 .place-card-content {
-    padding: 1.5rem;
+    padding: 1rem;
 }
 
-.place-title {
-    margin-bottom: 0.5rem;
-    color: var(--secondary-color);
+.place-card-content h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--primary-color);
     font-size: 1.25rem;
 }
 
-.place-price {
-    color: var(--primary-color);
-    font-weight: bold;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
+.place-location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
 }
 
-.place-description {
-    color: var(--text-color);
-    margin-bottom: 1.5rem;
-    opacity: 0.8;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+.place-price {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+}
+
+/* Équipements */
+.place-amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #eee;
+}
+
+.amenity-tag {
+    background: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    color: #666;
+}
+
+.amenity-tag.more {
+    background: #e9ecef;
+    font-size: 0.9rem;
+}
+
+/* Message "Aucun lieu" */
+.no-places {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: var(--border-radius);
+    color: #666;
+}
+
+/* Messages d'erreur */
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: #f8d7da;
+    color: #721c24;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* Responsive */
@@ -122,29 +172,30 @@
         gap: 1rem;
     }
 
-    .filters {
-        justify-content: center;
-        margin: 1rem 0 2rem;
-    }
-
-    .price-filter {
-        width: 100%;
-        max-width: 400px;
-        justify-content: space-between;
+    .place-card-image {
+        height: 180px;
     }
 }
 
 @media (max-width: 480px) {
-    .places-container h1 {
-        font-size: 1.5rem;
-        text-align: center;
+    .places-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filters {
+        padding: 0.75rem;
+    }
+
+    .price-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .place-card-image {
+        height: 150px;
     }
 
     .place-card-content {
-        padding: 1rem;
-    }
-
-    .place-title {
-        font-size: 1.1rem;
+        padding: 0.75rem;
     }
 }

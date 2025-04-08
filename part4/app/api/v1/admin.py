@@ -1,3 +1,4 @@
+"""Module de gestion de l'administration"""
 from flask import jsonify, request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.user import User
@@ -20,7 +21,7 @@ def require_admin(fn):
     wrapper.__name__ = fn.__name__
     return wrapper
 
-@admin_bp.route('/admin/users', methods=['GET'])
+@admin_bp.route('/users', methods=['GET'])
 @require_admin
 def get_users():
     """Get all users."""
@@ -30,7 +31,7 @@ def get_users():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@admin_bp.route('/admin/users', methods=['POST'])
+@admin_bp.route('/users', methods=['POST'])
 @require_admin
 def create_user():
     """Create a new user."""
@@ -69,7 +70,7 @@ def create_user():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@admin_bp.route('/admin/users/<string:user_id>', methods=['DELETE'])
+@admin_bp.route('/users/<string:user_id>', methods=['DELETE'])
 @require_admin
 def delete_user(user_id):
     """Delete a user."""
@@ -89,7 +90,7 @@ def delete_user(user_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@admin_bp.route('/admin/users/<string:user_id>/promote', methods=['POST'])
+@admin_bp.route('/users/<string:user_id>/promote', methods=['POST'])
 @require_admin
 def promote_user(user_id):
     """Promote a user to admin."""
@@ -105,7 +106,7 @@ def promote_user(user_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@admin_bp.route('/admin/users/<string:user_id>/demote', methods=['POST'])
+@admin_bp.route('/users/<string:user_id>/demote', methods=['POST'])
 @require_admin
 def demote_user(user_id):
     """Remove admin status from a user."""

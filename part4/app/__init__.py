@@ -1,75 +1,62 @@
-"""Module d'initialisation de l'application Flask"""
-from flask import Flask, send_from_directory
-from flask_cors import CORS
+"""Application Flask pour HBNB"""
 import os
-from app.extensions import db, bcrypt, jwt
-from app.api.v1 import api_v1
+from flask import Flask
+from flask_cors import CORS
+from app.extensions import db, jwt, bcrypt
 
 def create_app():
-    """
-    Crée et configure l'application Flask
-
-    Returns:
-        Flask: L'application configurée
-    """
-    # Création de l'application
-    app = Flask(__name__, static_folder=None)  # Désactive le dossier static par défaut
+    """Crée et configure l'application Flask"""
+    app = Flask(__name__, static_folder='../static', static_url_path='')
 
     # Configuration
-    app.config.from_object('config.DevelopmentConfig')
+    env = os.getenv('FLASK_ENV', 'development')
+    app.config.from_object(f'config.{env.capitalize()}Config')
 
-    # Extensions
+    # Initialisation des extensions
+    CORS(app)
     db.init_app(app)
-    bcrypt.init_app(app)
     jwt.init_app(app)
+    bcrypt.init_app(app)
 
-    # CORS - Autorise les requêtes cross-origin
-    CORS(app, resources={
-        r"/*": {
-            "origins": "*",
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "expose_headers": ["Authorization"],
-            "supports_credentials": True
-        }
-    })
+    # User loader pour JWT
+    from app.models.user import User
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header, jwt_data):
+        identity = jwt_data["sub"]
+        return User.query.filter_by(id=identity).first()
 
-    # Initialisation de la base de données
-    with app.app_context():
-        db.create_all()
+    # Blueprints
+    from app.api.v1.users import users_bp
+    app.register_blueprint(users_bp, url_prefix='/api/v1')
 
-    # Enregistrement des blueprints
-    app.register_blueprint(api_v1)
+    from app.api.v1.auth import auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
 
-    # Gestionnaire des fichiers statiques
-    @app.route('/', defaults={'path': 'index.html'})
+    from app.api.v1.places import places_bp
+    app.register_blueprint(places_bp, url_prefix='/api/v1')
+
+    from app.api.v1.reviews import reviews_bp
+    app.register_blueprint(reviews_bp, url_prefix='/api/v1')
+
+    from app.api.v1.admin import admin_bp
+    app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
+
+    from app.api.v1.amenities import amenities_bp
+    app.register_blueprint(amenities_bp, url_prefix='/api/v1')
+
+    from app.api.v1.bookings import bookings_bp
+    app.register_blueprint(bookings_bp, url_prefix='/api/v1')
+
+    # Page d'accueil (servie statiquement)
+    @app.route('/')
+    def index():
+        """Route pour la page d'accueil"""
+        return app.send_static_file('index.html')
+
+    # Pages statiques
     @app.route('/<path:path>')
-    def serve_static(path):
-        """Sert les fichiers statiques depuis le dossier /static"""
-        static_folder = os.path.join(os.path.dirname(app.root_path), 'static')
-
-        # Vérifie d'abord si le fichier existe dans un sous-dossier
-        for subdir in ['css', 'js', 'images']:
-            file_path = os.path.join(static_folder, subdir, path)
-            if os.path.isfile(file_path):
-                return send_from_directory(os.path.join(static_folder, subdir), path)
-
-        # Si le fichier est directement dans /static
-        if os.path.isfile(os.path.join(static_folder, path)):
-            return send_from_directory(static_folder, path)
-
-        # Par défaut, retourne index.html
-        return send_from_directory(static_folder, 'index.html')
-
-    # Gestionnaire d'erreurs
-    @app.errorhandler(404)
-    def not_found_error(error):
-        """Gère les erreurs 404"""
-        if "/api/" in error.description:
-            return {'error': 'Not found'}, 404
-        return send_from_directory(
-            os.path.join(os.path.dirname(app.root_path), 'static'),
-            'index.html'
-        )
+    def static_files(path):
+        """Route pour les fichiers statiques"""
+        return app.send_static_file(path)
 
     return app

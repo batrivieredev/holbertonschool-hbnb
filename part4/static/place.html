@@ -45,6 +45,29 @@
             <div class="loading">Chargement...</div>
         </div>
 
+        <!-- Formulaire de réservation -->
+        <div id="booking-section" class="booking-section" style="display: none;">
+            <h2>Réserver ce lieu</h2>
+            <form id="booking-form" class="booking-form">
+                <div class="form-group">
+                    <label for="start_date">Date d'arrivée</label>
+                    <input type="date" id="start_date" name="start_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">Date de départ</label>
+                    <input type="date" id="end_date" name="end_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message pour le propriétaire (optionnel)</label>
+                    <textarea id="message" name="message" rows="4" placeholder="Présentez-vous et expliquez l'objet de votre séjour..."></textarea>
+                </div>
+                <button type="submit" class="button">
+                    <span class="icon">📅</span> Réserver
+                    <span class="loading-spinner" style="display: none;"></span>
+                </button>
+            </form>
+        </div>
+
         <!-- Section des avis -->
         <div id="reviews-section" class="reviews-section">
             <h2>Avis</h2>
@@ -71,6 +94,14 @@
             <!-- Liste des avis -->
             <div id="reviews-list">
                 <div class="loading">Chargement des avis...</div>
+            </div>
+        </div>
+
+        <!-- Mes réservations (pour le propriétaire) -->
+        <div id="place-bookings" class="bookings-section" style="display: none;">
+            <h2>Demandes de réservation</h2>
+            <div id="bookings-list">
+                <!-- Les réservations seront ajoutées ici -->
             </div>
         </div>
     </main>

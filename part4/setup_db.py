@@ -7,6 +7,7 @@ from app.models.user import User
 from app.models.place import Place
 from app.models.review import Review
 from app.models.amenity import Amenity
+from app.models.place_photo import PlacePhoto
 
 def init_db(app):
     """Initialise la base de données et crée les tables si nécessaire"""

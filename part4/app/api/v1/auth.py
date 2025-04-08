@@ -11,7 +11,7 @@ from app.extensions import db
 # Création du blueprint
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route('/auth/register', methods=['POST'])
+@auth_bp.route('/register', methods=['POST'])
 def register():
     """Crée un nouvel utilisateur"""
     try:
@@ -62,7 +62,7 @@ def register():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@auth_bp.route('/auth/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST'])
 def login():
     """Authentifie un utilisateur et retourne un token JWT"""
     try:
@@ -100,7 +100,7 @@ def login():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@auth_bp.route('/auth/profile', methods=['GET'])
+@auth_bp.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
     """Retourne le profil de l'utilisateur connecté"""
