@@ -1,115 +1,107 @@
-"""Module gérant l'API des équipements (amenities) pour l'application HBnB.
-Implémente les endpoints REST pour CRUD sur les équipements.
+from flask import jsonify, request, Blueprint
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models.amenity import Amenity
+from app.models.user import User
 
-Routes:
-    GET /amenities/ : Liste tous les équipements
-    POST /amenities/ : Crée un nouvel équipement
-    GET /amenities/<id> : Récupère un équipement spécifique
-    PUT /amenities/<id> : Met à jour un équipement
-"""
+# Create amenities blueprint
+amenities_bp = Blueprint('amenities', __name__)
 
-from flask_restx import Namespace, Resource, fields
-from app.services.AmenityFacade import AmenityFacade
-from app.api.v1.auth import admin_required
-from flask_jwt_extended import (
-    jwt_required,
-)
+@amenities_bp.route('/amenities', methods=['GET'])
+def get_amenities():
+    """Get list of all amenities."""
+    try:
+        amenities = Amenity.query.all()
+        return jsonify([amenity.to_dict() for amenity in amenities]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-api = Namespace('amenities', description='Amenity operations')
-
-# Documentation Swagger améliorée
-amenity_model = api.model('Amenity', {
-    'name': fields.String(
-        required=True,
-        description='Nom unique de l équipement (ex: "WiFi", "Parking")',
-        example="WiFi"
-    )
-})
-
-facade = AmenityFacade()
-
-
-@api.route('/')
-class AmenityList(Resource):
-    """Gestion des opérations sur la collection d'équipements."""
-
-    @api.response(200, 'List of amenities retrieved successfully')
-    def get(self):
-        """Récupère tous les équipements.
-
-        Returns:
-            list: Liste des équipements au format JSON
-            int: Code HTTP 200 en cas de succès
-        """
-        amenities = facade.get_all_amenities()
-
-        # Si aucune amenity, renvoie une liste vide avec un status 200
-        return ([] if not amenities else [{'id': amenity.id, 'name': amenity.name} for amenity in amenities]), 200
-
-    @api.expect(amenity_model)
-    @api.doc(security='jwt')
-    @jwt_required()
-    @admin_required
-    @api.response(403, 'Admin privileges required')
-    @api.response(201, 'Amenity successfully created')
-    @api.response(400, 'Invalid input data')
-    def post(self):
-        """Crée un nouvel équipement.
-
-        Validation:
-            - Le nom ne doit pas être vide
-            - Le nom doit être unique
-
-        Returns:
-            dict: Données de l'équipement créé
-            int: Code HTTP 201 en cas de succès, 400 si données invalides
-        """
-        amenity_data = api.payload
-        name = amenity_data.get('name')
-
-        # Vérification avant toute tentative de création
-        if not name or not isinstance(name, str) or name.strip() == "":
-            return {'error': 'Name is required and must be a non-empty string'}, 400
-
-        existing_amenity = facade.get_amenity_by_name(name)
-        if existing_amenity:
-            return {'error': 'Name already registered'}, 400
-
-        new_amenity = facade.create_amenity(amenity_data)
-        return {'id': new_amenity.id, 'name': new_amenity.name}, 201
-
-
-@api.route('/<amenity_id>')
-class AmenityResource(Resource):
-    """Gestion des opérations sur un équipement spécifique."""
-
-    @api.response(200, 'Amenity details retrieved successfully')
-    @api.response(404, 'Amenity not found')
-    def get(self, amenity_id):
-        """Get amenity details by ID"""
-        amenity = facade.get_amenity(amenity_id)
+@amenities_bp.route('/amenities/<string:amenity_id>', methods=['GET'])
+def get_amenity(amenity_id):
+    """Get a specific amenity."""
+    try:
+        amenity = Amenity.query.get(amenity_id)
         if not amenity:
-            return {'error': 'Amenity not found'}, 404
-        return {'id': amenity.id, 'name': amenity.name}, 200
+            return jsonify({'error': 'Amenity not found'}), 404
+        return jsonify(amenity.to_dict()), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-    @api.expect(amenity_model)
-    @api.doc(security='jwt')
-    @jwt_required()
-    @admin_required
-    @api.response(403, 'Admin privileges required')
-    @api.response(200, 'Amenity updated successfully')
-    @api.response(404, 'Amenity not found')
-    @api.response(400, 'Invalid input data')
-    def put(self, amenity_id):
-        """Update an amenity's information"""
-        amenity_data = api.payload
+@amenities_bp.route('/amenities', methods=['POST'])
+@jwt_required()
+def create_amenity():
+    """Create a new amenity (admin only)."""
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
 
-        if not amenity_data or 'name' not in amenity_data or not amenity_data['name'].strip():
-            return {'error': 'Invalid input data. Name is required and must be non-empty.'}, 400
+        if not user or not user.is_admin:
+            return jsonify({'error': 'Admin access required'}), 403
 
-        amenity = facade.update_amenity(amenity_id, amenity_data)
+        data = request.get_json()
 
+        # Check if amenity already exists
+        existing = Amenity.get_by_name(data.get('name'))
+        if existing:
+            return jsonify({'error': 'Amenity already exists'}), 400
+
+        amenity = Amenity.create_amenity(data)
+        return jsonify(amenity.to_dict()), 201
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@amenities_bp.route('/amenities/<string:amenity_id>', methods=['PUT'])
+@jwt_required()
+def update_amenity(amenity_id):
+    """Update an amenity (admin only)."""
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        if not user or not user.is_admin:
+            return jsonify({'error': 'Admin access required'}), 403
+
+        amenity = Amenity.query.get(amenity_id)
         if not amenity:
-            return {'error': 'Amenity not found'}, 404
+            return jsonify({'error': 'Amenity not found'}), 404
 
-        return {'id': amenity.id, 'name': amenity.name}, 200
+        data = request.get_json()
+        amenity.update_from_dict(data)
+        return jsonify(amenity.to_dict()), 200
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@amenities_bp.route('/amenities/<string:amenity_id>', methods=['DELETE'])
+@jwt_required()
+def delete_amenity(amenity_id):
+    """Delete an amenity (admin only)."""
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        if not user or not user.is_admin:
+            return jsonify({'error': 'Admin access required'}), 403
+
+        amenity = Amenity.query.get(amenity_id)
+        if not amenity:
+            return jsonify({'error': 'Amenity not found'}), 404
+
+        amenity.delete()
+        return jsonify({'message': 'Amenity deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@amenities_bp.route('/places/<string:place_id>/amenities', methods=['GET'])
+def get_place_amenities(place_id):
+    """Get amenities for a specific place."""
+    try:
+        from app.models.place import Place
+        place = Place.query.get(place_id)
+        if not place:
+            return jsonify({'error': 'Place not found'}), 404
+        return jsonify([amenity.to_dict() for amenity in place.amenities]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

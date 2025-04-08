@@ -1,42 +1,75 @@
+"""Module d'initialisation de l'application Flask"""
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from app.extensions import db, bcrypt, jwt
 import os
+from app.extensions import db, bcrypt, jwt
+from app.api.v1 import api_v1
 
 def create_app():
-    app = Flask(__name__, static_folder='../static', static_url_path='/static')
+    """
+    Crée et configure l'application Flask
+
+    Returns:
+        Flask: L'application configurée
+    """
+    # Création de l'application
+    app = Flask(__name__, static_folder=None)  # Désactive le dossier static par défaut
+
+    # Configuration
     app.config.from_object('config.DevelopmentConfig')
 
-    # Initialize extensions
+    # Extensions
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
 
-    # Enable CORS
-    CORS(app, resources={r"/api/*": {
-        "origins": "*",
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "expose_headers": ["Authorization"],
-        "supports_credentials": True
-    }})
+    # CORS - Autorise les requêtes cross-origin
+    CORS(app, resources={
+        r"/*": {
+            "origins": "*",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "expose_headers": ["Authorization"],
+            "supports_credentials": True
+        }
+    })
 
-    # Register API blueprint
-    from app.api.v1 import api_v1
-    app.register_blueprint(api_v1, url_prefix='/api/v1')
+    # Initialisation de la base de données
+    with app.app_context():
+        db.create_all()
 
-    # Serve static files
+    # Enregistrement des blueprints
+    app.register_blueprint(api_v1)
+
+    # Gestionnaire des fichiers statiques
     @app.route('/', defaults={'path': 'index.html'})
     @app.route('/<path:path>')
     def serve_static(path):
-        if path.endswith('.js'):
-            return send_from_directory(os.path.join(app.static_folder, 'js'), path)
-        elif path.endswith('.css'):
-            return send_from_directory(os.path.join(app.static_folder, 'css'), path)
-        elif path.endswith('.html'):
-            return send_from_directory(app.static_folder, path)
-        elif path.endswith('.html'):
-            return send_from_directory(app.static_folder, path)
-        return send_from_directory(app.static_folder, 'index.html')
+        """Sert les fichiers statiques depuis le dossier /static"""
+        static_folder = os.path.join(os.path.dirname(app.root_path), 'static')
+
+        # Vérifie d'abord si le fichier existe dans un sous-dossier
+        for subdir in ['css', 'js', 'images']:
+            file_path = os.path.join(static_folder, subdir, path)
+            if os.path.isfile(file_path):
+                return send_from_directory(os.path.join(static_folder, subdir), path)
+
+        # Si le fichier est directement dans /static
+        if os.path.isfile(os.path.join(static_folder, path)):
+            return send_from_directory(static_folder, path)
+
+        # Par défaut, retourne index.html
+        return send_from_directory(static_folder, 'index.html')
+
+    # Gestionnaire d'erreurs
+    @app.errorhandler(404)
+    def not_found_error(error):
+        """Gère les erreurs 404"""
+        if "/api/" in error.description:
+            return {'error': 'Not found'}, 404
+        return send_from_directory(
+            os.path.join(os.path.dirname(app.root_path), 'static'),
+            'index.html'
+        )
 
     return app

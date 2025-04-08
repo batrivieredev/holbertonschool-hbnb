@@ -8,7 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
-    <link rel="stylesheet" href="/css/styles.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 <body>
     <header>
@@ -19,33 +21,69 @@
             </a>
             <nav class="nav-links">
                 <a href="/" class="nav-link">
-                    <span class="icon">🏠</span> Accueil
+                    <span class="icon">🏠</span> Retour à l'accueil
                 </a>
             </nav>
         </div>
     </header>
 
     <main>
-        <div class="login-container">
-            <h1>
-                <span class="icon">👤</span> Connexion
-            </h1>
-            <form id="login-form" class="login-form">
+        <div class="auth-container">
+            <h1>Connexion</h1>
+            <form id="login-form" class="auth-form">
                 <div class="form-group">
-                    <label for="email">
-                        <span class="icon">📧</span> Email
-                    </label>
-                    <input type="email" id="email" name="email" required>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required
+                           placeholder="Votre adresse email"
+                           autocomplete="email">
                 </div>
+
                 <div class="form-group">
-                    <label for="password">
-                        <span class="icon">🔑</span> Mot de passe
-                    </label>
-                    <input type="password" id="password" name="password" required>
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" name="password" required
+                           placeholder="Votre mot de passe"
+                           autocomplete="current-password">
                 </div>
-                <div id="error-message" class="error-message"></div>
+
                 <button type="submit" class="button">
-                    <span class="icon">➡️</span> Se connecter
+                    <span class="icon">🔐</span> Se connecter
+                    <span class="loading-spinner" style="display: none;"></span>
+                </button>
+            </form>
+
+            <div class="auth-divider">
+                <span>ou</span>
+            </div>
+
+            <form id="register-form" class="auth-form">
+                <h2>Créer un compte</h2>
+                <div class="form-group">
+                    <label for="reg-email">Email</label>
+                    <input type="email" id="reg-email" name="email" required
+                           placeholder="Votre adresse email">
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-password">Mot de passe</label>
+                    <input type="password" id="reg-password" name="password" required
+                           placeholder="Choisissez un mot de passe">
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-firstName">Prénom</label>
+                    <input type="text" id="reg-firstName" name="firstName" required
+                           placeholder="Votre prénom">
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-lastName">Nom</label>
+                    <input type="text" id="reg-lastName" name="lastName" required
+                           placeholder="Votre nom">
+                </div>
+
+                <button type="submit" class="button">
+                    <span class="icon">➕</span> Créer un compte
+                    <span class="loading-spinner" style="display: none;"></span>
                 </button>
             </form>
         </div>
@@ -62,6 +100,7 @@
         </div>
     </footer>
 
+    <!-- JavaScript -->
     <script src="/js/login.js"></script>
 </body>
 </html>

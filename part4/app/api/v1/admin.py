@@ -1,100 +1,126 @@
-from flask import Blueprint, jsonify, request
+from flask import jsonify, request, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.user import User
 from app.extensions import db
-import traceback
 
+# Create admin blueprint
 admin_bp = Blueprint('admin', __name__)
 
-@admin_bp.route('/admin/users', methods=['POST'])
-@jwt_required()
-def create_user():
-    try:
-        # Get current user ID from JWT
+def require_admin(fn):
+    """Decorator to check if user is admin."""
+    @jwt_required()
+    def wrapper(*args, **kwargs):
         current_user_id = get_jwt_identity()
-        current_user = User.query.get(current_user_id)
+        user = User.query.get(current_user_id)
 
-        # Check if current user is admin
-        if not current_user or not current_user.is_admin:
-            return jsonify({"message": "Unauthorized. Admin privileges required."}), 403
+        if not user or not user.is_admin:
+            return jsonify({'error': 'Admin access required'}), 403
 
-        # Get request data
-        data = request.get_json()
-        if not data or not all(k in data for k in ['first_name', 'last_name', 'email', 'password', 'is_admin']):
-            return jsonify({"message": "Missing required fields"}), 400
-
-        # Check if user with email already exists
-        if User.query.filter_by(email=data['email']).first():
-            return jsonify({"message": "User with this email already exists"}), 400
-
-        # Create new user
-        new_user = User(
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            email=data['email'],
-            is_admin=data['is_admin']
-        )
-        new_user.hash_password(data['password'])
-
-        db.session.add(new_user)
-        db.session.commit()
-
-        return jsonify({
-            "message": "User created successfully",
-            "user": new_user.to_dict()
-        }), 201
-    except Exception as e:
-        print(f"Error creating user: {str(e)}")
-        print(traceback.format_exc())
-        db.session.rollback()
-        return jsonify({"message": "An error occurred while creating the user"}), 500
+        return fn(*args, **kwargs)
+    wrapper.__name__ = fn.__name__
+    return wrapper
 
 @admin_bp.route('/admin/users', methods=['GET'])
-@jwt_required()
-def list_users():
+@require_admin
+def get_users():
+    """Get all users."""
     try:
-        # Get current user ID from JWT
-        current_user_id = get_jwt_identity()
-        current_user = User.query.get(current_user_id)
-
-        # Check if current user is admin
-        if not current_user or not current_user.is_admin:
-            return jsonify({"message": "Unauthorized. Admin privileges required."}), 403
-
-        # Get all users
         users = User.query.all()
         return jsonify([user.to_dict() for user in users]), 200
     except Exception as e:
-        print(f"Error listing users: {str(e)}")
-        return jsonify({"message": "An error occurred while fetching users"}), 500
+        return jsonify({'error': str(e)}), 500
 
-@admin_bp.route('/admin/users/<user_id>', methods=['DELETE'])
-@jwt_required()
-def delete_user(user_id):
+@admin_bp.route('/admin/users', methods=['POST'])
+@require_admin
+def create_user():
+    """Create a new user."""
     try:
-        # Get current user ID from JWT
-        current_user_id = get_jwt_identity()
-        current_user = User.query.get(current_user_id)
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
 
-        # Check if current user is admin
-        if not current_user or not current_user.is_admin:
-            return jsonify({"message": "Unauthorized. Admin privileges required."}), 403
+        required_fields = ['email', 'password', 'first_name', 'last_name']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
 
-        # Get user to delete
-        user_to_delete = User.query.get(user_id)
-        if not user_to_delete:
-            return jsonify({"message": "User not found"}), 404
+        # Check if user already exists
+        existing_user = User.query.filter_by(email=data['email']).first()
+        if existing_user:
+            return jsonify({'error': 'Email already exists'}), 400
 
-        # Prevent self-deletion
-        if user_to_delete.id == current_user.id:
-            return jsonify({"message": "Cannot delete your own account"}), 400
+        # Create new user
+        user = User(
+            email=data['email'],
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            is_admin=data.get('is_admin', False)
+        )
+        user.hash_password(data['password'])
 
-        # Delete the user
-        db.session.delete(user_to_delete)
-        db.session.commit()
+        try:
+            db.session.add(user)
+            db.session.commit()
+            return jsonify(user.to_dict()), 201
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
-        return jsonify({"message": "User deleted successfully"}), 200
     except Exception as e:
-        print(f"Error deleting user: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/admin/users/<string:user_id>', methods=['DELETE'])
+@require_admin
+def delete_user(user_id):
+    """Delete a user."""
+    try:
+        current_user_id = get_jwt_identity()
+        if user_id == current_user_id:
+            return jsonify({'error': 'Cannot delete yourself'}), 400
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'message': 'User deleted successfully'}), 200
+    except Exception as e:
         db.session.rollback()
-        return jsonify({"message": "An error occurred while deleting the user"}), 500
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/admin/users/<string:user_id>/promote', methods=['POST'])
+@require_admin
+def promote_user(user_id):
+    """Promote a user to admin."""
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        user.is_admin = True
+        db.session.commit()
+        return jsonify(user.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/admin/users/<string:user_id>/demote', methods=['POST'])
+@require_admin
+def demote_user(user_id):
+    """Remove admin status from a user."""
+    try:
+        current_user_id = get_jwt_identity()
+        if user_id == current_user_id:
+            return jsonify({'error': 'Cannot demote yourself'}), 400
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        user.is_admin = False
+        db.session.commit()
+        return jsonify(user.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

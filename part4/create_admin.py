@@ -1,43 +1,53 @@
+#!/usr/bin/env python3
+"""Script de création de l'utilisateur administrateur"""
 from app import create_app
-from app.models.user import User
 from app.extensions import db
+from app.models.user import User
 
 def create_admin():
-    """Create an admin user if it doesn't exist."""
-    print("🔄 Creating admin user...")
+    """Crée un utilisateur administrateur s'il n'existe pas"""
+    print("🔄 Création de l'utilisateur administrateur...")
 
-    app = create_app()
-    with app.app_context():
-        try:
-            # Check if admin already exists
+    try:
+        app = create_app()
+        with app.app_context():
+            # Vérifie si l'admin existe déjà
             existing_admin = User.query.filter_by(email='admin@hbnb.io').first()
-            if existing_admin:
-                print("ℹ️  Admin user already exists")
-                print("📧 Email: admin@hbnb.io")
-                print("🔑 Password: admin12345")
-                return
 
-            # Create new admin if it doesn't exist
+            if existing_admin:
+                print("ℹ️ L'administrateur existe déjà")
+                return True
+
+            # Création de l'administrateur
             admin = User(
                 first_name='Admin',
-                last_name='HBnB',
+                last_name='HBNB',
                 email='admin@hbnb.io',
                 is_admin=True
             )
+            # Définition du mot de passe
             admin.hash_password('admin12345')
 
+            # Sauvegarde en base de données
             db.session.add(admin)
             db.session.commit()
 
-            print("✅ Admin user created successfully!")
-            print("\nLogin credentials:")
+            print("✅ Administrateur créé avec succès!")
+            print("\nIdentifiants de connexion:")
             print("📧 Email: admin@hbnb.io")
-            print("🔑 Password: admin12345")
+            print("🔑 Mot de passe: admin12345")
+            return True
 
-        except Exception as e:
-            print(f"❌ Error creating admin user: {str(e)}")
+    except Exception as e:
+        print(f"❌ Erreur lors de la création de l'administrateur: {str(e)}")
+        if 'db' in locals():
             db.session.rollback()
-            raise
+        return False
 
-if __name__ == '__main__':
-    create_admin()
+if __name__ == "__main__":
+    if create_admin():
+        print("✅ Création de l'administrateur terminée.")
+    else:
+        import sys
+        print("❌ Échec de la création de l'administrateur.")
+        sys.exit(1)

@@ -1,50 +1,85 @@
-#!/usr/bin/python3
-
 import uuid
 from datetime import datetime
 from app.extensions import db
-
-"""
-Modèle de base pour tous les objets de l'application.
-Fournit les champs communs et fonctionnalités partagées.
-
-Fonctionnalités:
-    - Génération automatique d'ID unique (UUID)
-    - Horodatage automatique (création/modification)
-    - Méthodes communes de persistence
-"""
+from sqlalchemy.ext.declarative import declared_attr
 
 class BaseModel(db.Model):
-    """Classe de base abstraite pour tous les modèles.
-    Hérite de db.Model pour fournir la fonctionnalité SQLAlchemy.
+    """Base model class that includes UUID and timestamp attributes."""
 
-    Attributes:
-        id (str): Identifiant unique UUID v4
-        created_at (datetime): Date de création automatique
-        updated_at (datetime): Date de dernière modification
-    """
-    __abstract__ = True  # Prevents SQLAlchemy from creating a table for this base class
+    __abstract__ = True
+
+    @declared_attr
+    def __tablename__(cls):
+        """Generate __tablename__ automatically from class name."""
+        return cls.__name__.lower() + 's'
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __init__(self, *args, **kwargs):
+        """Initialize with UUID and timestamps if not provided."""
+        if not 'id' in kwargs:
+            kwargs['id'] = str(uuid.uuid4())
+        if not 'created_at' in kwargs:
+            kwargs['created_at'] = datetime.utcnow()
+        if not 'updated_at' in kwargs:
+            kwargs['updated_at'] = datetime.utcnow()
+        super().__init__(*args, **kwargs)
 
     def save(self):
-        """Save the instance to the database."""
+        """Save the current instance and update timestamps."""
+        self.updated_at = datetime.utcnow()
         db.session.add(self)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
-    def update(self, data):
-        """Met à jour l'instance avec les données fournies.
+    def delete(self):
+        """Delete the current instance."""
+        try:
+            db.session.delete(self)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
-        Args:
-            data (dict): Dictionnaire des champs à mettre à jour
-
-        Notes:
-            - Mise à jour automatique de updated_at
-            - Ignore les champs qui n'existent pas
-        """
-        for key, value in data.items():
+    def update(self, **kwargs):
+        """Update instance attributes and save changes."""
+        for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
         self.save()
+
+    def to_dict(self):
+        """Convert instance to dictionary."""
+        result = {}
+        for column in self.__table__.columns:
+            value = getattr(self, column.name)
+            if isinstance(value, datetime):
+                value = value.isoformat()
+            result[column.name] = value
+        return result
+
+    @classmethod
+    def get_by_id(cls, id):
+        """Get instance by ID."""
+        return cls.query.get(str(id))
+
+    @classmethod
+    def get_all(cls):
+        """Get all instances."""
+        return cls.query.all()
+
+    def validate(self):
+        """
+        Base validation method to be overridden by child classes.
+        Should raise ValueError if validation fails.
+        """
+        pass
+
+    def __repr__(self):
+        """Return string representation of the instance."""
+        return f"<{self.__class__.__name__} {self.id}>"

@@ -1,194 +1,27 @@
-# Gestion des migrations de base de données
-alembic==1.11.1
-
-# Gestion des dates ISO 8601
-aniso8601==10.0.0
-
-# Gestion des attributs pour les classes Python
-attrs==25.3.0
-
-# Hashage sécurisé des mots de passe
-bcrypt==4.0.1
-
-# Outil de formatage automatique de code Python
-black==23.7.0
-
-# Certificats SSL pour les connexions sécurisées
-certifi==2025.1.31
-
-# Normalisation des encodages de caractères
-charset-normalizer==2.0.12
-
-# Gestion des commandes CLI pour Flask
-click==8.1.8
-
-# Analyse de couverture de tests
-coverage==7.2.7
-
-# Analyse statique du code Python pour respecter PEP8
-flake8==6.1.0
-
-# Génération de documentation Swagger pour les APIs Flask
-flasgger==0.9.5
-
-# Framework web léger pour Python
-Flask==2.2.5
-
-# Intégration de bcrypt avec Flask pour le hashage des mots de passe
+# Framework web
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Cors==4.0.0
+Flask-JWT-Extended==4.6.0
 Flask-Bcrypt==1.0.1
+Werkzeug==3.0.1
 
-# Gestion des tokens JWT pour l'authentification
-Flask-JWT-Extended==4.5.2
+# Base de données
+SQLAlchemy==2.0.25
+SQLAlchemy-Utils==0.41.1
 
-# Gestion des migrations de base de données avec Flask
-Flask-Migrate==4.0.4
-
-# Création d'APIs RESTful avec Flask
-Flask-RESTful==0.3.9
-
-# Extension pour Flask pour créer des APIs RESTful avec Swagger
-flask-restx==1.3.0
-
-# Intégration d'ORM SQLAlchemy avec Flask
-Flask-SQLAlchemy==2.5.1
-
-# Serveur asynchrone pour Python
-gevent==23.7.0
-
-# Support pour les coroutines dans Python
-greenlet==3.1.1
-
-# Serveur HTTP pour déployer des applications Python
-gunicorn==20.1.0
-
-# Gestion des encodages d'URL
-idna==3.10
-
-# Gestion des ressources importables
-importlib_resources==6.5.2
-
-# Gestion des fichiers de configuration pour pytest
-iniconfig==2.1.0
-
-# Outil pour trier automatiquement les imports
-isort==5.12.0
-
-# Gestion des signatures cryptographiques
-itsdangerous==2.2.0
-
-# Moteur de templates pour Flask
-Jinja2==3.1.6
-
-# Validation de schémas JSON
-jsonschema==4.23.0
-
-# Spécifications pour les schémas JSON
-jsonschema-specifications==2024.10.1
-
-# Manipulation de fichiers XML
-lxml==5.3.1
-
-# Moteur de templates pour SQLAlchemy
-Mako==1.3.9
-
-# Gestion des chaînes de caractères sécurisées
-MarkupSafe==3.0.2
-
-# Analyse statique pour détecter les erreurs dans le code Python
-mccabe==0.7.0
-
-# Rendu de Markdown
-mistune==3.1.3
-
-# Extensions pour mypy (vérification de types)
-mypy-extensions==1.0.0
-
-# Gestion des dépendances Python
-packaging==24.2
-
-# Gestion des chemins de fichiers
-pathspec==0.12.1
-
-# Gestion des répertoires spécifiques à la plateforme
-platformdirs==4.3.7
-
-# Plugin pour pytest
-pluggy==1.5.0
-
-# Exportation des métriques Prometheus pour Flask
-prometheus-flask-exporter==0.22.4
-
-# Client Prometheus pour exporter des métriques
-prometheus_client==0.21.1
-
-# Gestion des processus système
-psutil==5.9.5
-
-# Analyse statique pour respecter PEP8 (pycodestyle)
-pycodestyle==2.11.1
-
-# Analyse statique pour détecter les erreurs dans le code Python
-pyflakes==3.1.0
-
-# Gestion des tokens JWT
+# Sécurité
+bcrypt==4.1.2
 PyJWT==2.8.0
 
-# Connecteur MySQL pour Python
-PyMySQL==1.0.3
+# Utilitaires
+python-dotenv==1.0.0
+email-validator==2.1.0.post1
 
-# Framework de tests pour Python
-pytest==7.4.0
-
-# Extension pour pytest pour mesurer la couverture des tests
+# Tests
+pytest==7.4.4
 pytest-cov==4.1.0
 
-# Gestion des fichiers `.env` pour les variables d'environnement
-python-dotenv==0.19.0
-
-# Gestion des fuseaux horaires
-pytz==2025.2
-
-# Manipulation de fichiers YAML
-PyYAML==6.0.2
-
-# Référencement pour les schémas JSON
-referencing==0.36.2
-
-# Bibliothèque HTTP pour Python
-requests==2.26.0
-
-# Structures de données performantes pour Python
-rpds-py==0.24.0
-
-# Gestion des dépendances Python
-setuptools==78.1.0
-
-# Compatibilité entre Python 2 et 3
-six==1.17.0
-
-# ORM pour la gestion des bases de données
-SQLAlchemy==1.4.23
-
-# Extensions pour les annotations de types
-typing_extensions==4.13.0
-
-# Génération de rapports XML pour les tests unitaires
-unittest-xml-reporting==3.2.0
-
-# Gestion des connexions HTTP
-urllib3==1.26.20
-
-# Bibliothèque WSGI pour Flask
-Werkzeug==3.1.3
-
-# Gestion des événements pour Python
-zope.event==5.0
-
-# Interface pour les composants Zope
-zope.interface==7.2
-
-#installation de swagger
-flask-swagger-ui==4.11.1
-
-# Gestion des CORS pour Flask
-Flask-CORS==4.0.0
+# Formatage et qualité de code
+black==23.12.1
+flake8==7.0.0

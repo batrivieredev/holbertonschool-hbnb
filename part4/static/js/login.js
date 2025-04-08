@@ -1,55 +1,121 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('login-form');
-    const errorMessage = document.getElementById('error-message');
+// Gestionnaire de connexion
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-    // Check if user is already logged in
-    const token = getCookie('token');
-    if (token) {
-        window.location.href = 'index.html';
-        return;
-    }
+    const button = e.target.querySelector('button[type="submit"]');
+    const spinner = button.querySelector('.loading-spinner');
 
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
+    // Désactive le bouton et affiche le spinner
+    button.disabled = true;
+    spinner.style.display = 'inline-block';
 
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+    try {
+        const response = await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            })
+        });
 
-        errorMessage.textContent = '';
+        const data = await response.json();
 
-        try {
-            const response = await fetch('http://localhost:5001/api/v1/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            });
+        if (response.ok) {
+            // Stocke le token
+            document.cookie = `token=${data.token}; path=/`;
 
-            const data = await response.json();
-
-            if (response.ok) {
-                // Store token in cookie
-                document.cookie = `token=${data.access_token}; path=/; max-age=3600`;
-                // Redirect to admin page if user is admin, otherwise to main page
-                if (data.user && data.user.is_admin) {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'index.html';
-                }
+            // Redirige vers la page appropriée
+            if (data.user.is_admin) {
+                window.location.href = '/admin.html';
             } else {
-                errorMessage.textContent = data.message || 'Invalid email or password';
+                window.location.href = '/';
             }
-        } catch (error) {
-            console.error('Login error:', error);
-            errorMessage.textContent = 'An error occurred. Please try again later.';
+        } else {
+            showError(data.error || 'Erreur de connexion', 'login-form');
+            button.disabled = false;
+            spinner.style.display = 'none';
         }
-    });
-
-    // Helper function to get cookie value
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Une erreur est survenue lors de la connexion', 'login-form');
+        button.disabled = false;
+        spinner.style.display = 'none';
     }
 });
+
+// Gestionnaire d'inscription
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const button = e.target.querySelector('button[type="submit"]');
+    const spinner = button.querySelector('.loading-spinner');
+
+    // Désactive le bouton et affiche le spinner
+    button.disabled = true;
+    spinner.style.display = 'inline-block';
+
+    try {
+        const formData = {
+            email: document.getElementById('reg-email').value,
+            password: document.getElementById('reg-password').value,
+            first_name: document.getElementById('reg-firstName').value,
+            last_name: document.getElementById('reg-lastName').value,
+            is_admin: false  // Toujours false pour les nouveaux utilisateurs
+        };
+
+        const response = await fetch('/api/v1/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Connecte automatiquement l'utilisateur
+            document.cookie = `token=${data.token}; path=/`;
+            window.location.href = '/';
+        } else {
+            showError(data.error || 'Erreur lors de l\'inscription', 'register-form');
+            button.disabled = false;
+            spinner.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showError('Une erreur est survenue lors de l\'inscription', 'register-form');
+        button.disabled = false;
+        spinner.style.display = 'none';
+    }
+});
+
+// Affiche un message d'erreur
+function showError(message, formId) {
+    // Supprime les anciennes erreurs
+    const oldError = document.querySelector(`#${formId} + .error-message`);
+    if (oldError) {
+        oldError.remove();
+    }
+
+    // Crée et affiche le nouveau message d'erreur
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.innerHTML = `
+        <span class="icon">⚠️</span>
+        ${message}
+    `;
+
+    // Insère l'erreur après le formulaire
+    const form = document.getElementById(formId);
+    form.parentNode.insertBefore(errorDiv, form.nextSibling);
+
+    // Supprime automatiquement l'erreur après 5 secondes
+    setTimeout(() => {
+        errorDiv.style.opacity = '0';
+        setTimeout(() => errorDiv.remove(), 300);
+    }, 5000);
+}

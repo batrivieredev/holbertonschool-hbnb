@@ -1,0 +1,203 @@
+/* Styles spécifiques à la page de détails d'un lieu */
+
+/* Container principal */
+.place-container {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Image du lieu */
+.place-image-container {
+    width: 100%;
+    max-height: 400px;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    background-color: #eee;
+}
+
+.place-image-placeholder {
+    width: 100%;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    color: var(--secondary-color);
+}
+
+/* Contenu du lieu */
+.place-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.place-content h1 {
+    color: var(--secondary-color);
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.place-location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-bottom: 1rem;
+}
+
+.place-price {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+}
+
+.place-description {
+    color: var(--text-color);
+    line-height: 1.8;
+    margin-bottom: 2rem;
+}
+
+/* Informations propriétaire */
+.place-owner {
+    padding: 1rem;
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+}
+
+.place-owner p {
+    margin: 0;
+}
+
+/* Équipements */
+.place-amenities {
+    margin-bottom: 2rem;
+}
+
+.place-amenities h3 {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+}
+
+.place-amenities ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.place-amenities li {
+    background-color: var(--background-color);
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Section des avis */
+.reviews-section {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 2rem;
+}
+
+.reviews-section h2 {
+    color: var(--secondary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+/* Formulaire d'avis */
+.review-form {
+    background-color: var(--background-color);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+}
+
+.review-form h3 {
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+}
+
+/* Liste des avis */
+.review-card {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.review-author {
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+.review-rating {
+    color: #ffc107;
+}
+
+.review-text {
+    color: var(--text-color);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.review-date {
+    color: var(--text-color);
+    opacity: 0.6;
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .place-container,
+    .reviews-section {
+        padding: 1.5rem;
+    }
+
+    .place-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .place-price {
+        font-size: 1.25rem;
+    }
+
+    .place-amenities ul {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .place-container,
+    .reviews-section {
+        padding: 1rem;
+    }
+
+    .place-image-placeholder {
+        height: 250px;
+        font-size: 3rem;
+    }
+
+    .review-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}

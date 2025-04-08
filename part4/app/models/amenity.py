@@ -1,29 +1,57 @@
-#!/usr/bin/python3
-
-"""
-Modèle SQLAlchemy pour les équipements.
-Définit la structure de données et les contraintes pour les équipements.
-
-Table: amenities
-Colonnes:
-    - id (str): Identifiant unique UUID
-    - name (str): Nom unique de l'équipement
-    - created_at (datetime): Date de création
-    - updated_at (datetime): Date de dernière modification
-"""
-
 from app.extensions import db
 from app.models.BaseModel import BaseModel
-import uuid
 
 class Amenity(BaseModel):
-    """Represents an amenity linked to a specific place."""
+    """Amenity model for storing place amenities."""
 
     __tablename__ = 'amenities'
 
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    place_id = db.Column(db.String(36), db.ForeignKey('places.id', ondelete="CASCADE"), nullable=False)
-    name = db.Column(db.String(255), nullable=False, unique=True)
+    name = db.Column(db.String(50), unique=True, nullable=False, index=True)
+
+    def validate(self):
+        """Validate amenity attributes."""
+        if not self.name or len(self.name) > 50:
+            raise ValueError("Name is required and must be less than 50 characters")
+
+        # Check name uniqueness
+        existing_amenity = Amenity.query.filter(
+            Amenity.name == self.name,
+            Amenity.id != self.id
+        ).first()
+        if existing_amenity:
+            raise ValueError("Amenity name already exists")
+
+    def to_dict(self):
+        """Convert the amenity instance to a dictionary."""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+    @staticmethod
+    def create_amenity(data):
+        """Create a new amenity."""
+        amenity = Amenity(name=data['name'])
+        amenity.validate()
+        amenity.save()
+        return amenity
+
+    def update_from_dict(self, data):
+        """Update amenity attributes from a dictionary."""
+        if 'name' in data:
+            self.name = data['name']
+            self.validate()
+            self.save()
+
+    @classmethod
+    def get_by_name(cls, name):
+        """Get amenity by name."""
+        return cls.query.filter_by(name=name).first()
 
     def __repr__(self):
-        return f"<Amenity {self.name}, Place ID: {self.place_id}>"
+        return f"<Amenity {self.name}>"
+
+    def __str__(self):
+        return self.name

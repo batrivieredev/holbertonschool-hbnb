@@ -8,7 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
-    <link rel="stylesheet" href="/css/styles.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
     <header>
@@ -21,7 +23,7 @@
                 <a href="/" class="nav-link">
                     <span class="icon">🏠</span> Accueil
                 </a>
-                <button id="logout-button" class="button">
+                <button id="logout-button" class="nav-link">
                     <span class="icon">🚪</span> Déconnexion
                 </button>
             </nav>
@@ -30,58 +32,49 @@
 
     <main>
         <div class="admin-container">
-            <h1>
-                <span class="icon">⚙️</span> Panneau d'administration
-            </h1>
+            <h1>Administration</h1>
 
-            <section class="admin-section">
-                <h2>
-                    <span class="icon">👥</span> Créer un utilisateur
-                </h2>
+            <!-- Formulaire de création d'utilisateur -->
+            <section class="form-section">
+                <h2>Créer un nouvel utilisateur</h2>
                 <form id="create-user-form" class="admin-form">
                     <div class="form-group">
-                        <label for="first-name">
-                            <span class="icon">📝</span> Prénom
-                        </label>
-                        <input type="text" id="first-name" required>
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
                     </div>
+
                     <div class="form-group">
-                        <label for="last-name">
-                            <span class="icon">📝</span> Nom
-                        </label>
-                        <input type="text" id="last-name" required>
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" name="password" required>
                     </div>
+
                     <div class="form-group">
-                        <label for="email">
-                            <span class="icon">📧</span> Email
-                        </label>
-                        <input type="email" id="email" required>
+                        <label for="firstName">Prénom</label>
+                        <input type="text" id="firstName" name="firstName" required>
                     </div>
+
                     <div class="form-group">
-                        <label for="password">
-                            <span class="icon">🔑</span> Mot de passe
-                        </label>
-                        <input type="password" id="password" required>
+                        <label for="lastName">Nom</label>
+                        <input type="text" id="lastName" name="lastName" required>
                     </div>
+
                     <div class="form-group checkbox-group">
-                        <label>
-                            <input type="checkbox" id="is-admin">
-                            <span class="icon">👨‍💼</span> Administrateur
-                        </label>
+                        <input type="checkbox" id="isAdmin" name="isAdmin">
+                        <label for="isAdmin">Administrateur</label>
                     </div>
-                    <div id="error-message" class="error-message"></div>
+
                     <button type="submit" class="button">
                         <span class="icon">➕</span> Créer l'utilisateur
+                        <span class="loading-spinner" style="display: none;"></span>
                     </button>
                 </form>
             </section>
 
-            <section class="admin-section">
-                <h2>
-                    <span class="icon">📋</span> Liste des utilisateurs
-                </h2>
-                <div id="users-list" class="users-list">
-                    <!-- Users will be displayed here -->
+            <!-- Liste des utilisateurs -->
+            <section class="users-section">
+                <h2>Utilisateurs</h2>
+                <div id="users-list" class="users-grid">
+                    <div class="loading">Chargement des utilisateurs...</div>
                 </div>
             </section>
         </div>
@@ -98,6 +91,7 @@
         </div>
     </footer>
 
+    <!-- JavaScript -->
     <script src="/js/admin.js"></script>
 </body>
 </html>

@@ -1,53 +1,39 @@
-"""
-Point d'entrée pour le serveur de développement.
-Lance l'application Flask en mode debug.
-
-Usage:
-    python run.py [--reset-db]
-
-Options:
-    --reset-db : Réinitialiser la base de données avant de démarrer
-"""
 #!/usr/bin/env python3
-import argparse
+"""Point d'entrée principal de l'application HBNB"""
 import os
-from flask import send_from_directory
+import sys
 from app import create_app
-from setup_db import init_database, reset_database
+from setup_db import init_db
 from create_admin import create_admin
 
 def main():
-    parser = argparse.ArgumentParser(description="Lance l'application Flask.")
-    parser.add_argument('--reset-db', action='store_true', help="Réinitialiser la base de données avant de démarrer")
-    args = parser.parse_args()
+    """Initialise et démarre l'application"""
+    try:
+        # Création de l'instance Flask
+        app = create_app()
 
-    # Crée l'application avec la configuration par défaut
-    app = create_app()
+        # Initialisation de la base de données si nécessaire
+        if not init_db(app):
+            print("❌ Échec de l'initialisation de la base de données")
+            sys.exit(1)
 
-    if args.reset_db:
-        print("🔄 Réinitialisation de la base de données...")
-        with app.app_context():
-            reset_database()
-            print("✅ Base de données réinitialisée avec succès.")
-            # Create admin user after database reset
-            create_admin()
-    else:
-        with app.app_context():
-            init_database()
-            # Ensure admin exists even without reset
-            create_admin()
+        # Création de l'utilisateur admin si nécessaire
+        if not create_admin():
+            print("❌ Échec de la création de l'administrateur")
+            sys.exit(1)
 
-    # Routes pour servir les fichiers statiques
-    @app.route('/css/<path:filename>')
-    def serve_css(filename):
-        return send_from_directory(os.path.join(app.root_path, '../static/css'), filename)
+        # Configuration du serveur
+        host = os.getenv('FLASK_HOST', '0.0.0.0')  # Interface d'écoute
+        port = int(os.getenv('FLASK_PORT', 5001))  # Port d'écoute
+        debug = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'  # Mode debug
 
-    @app.route('/js/<path:filename>')
-    def serve_js(filename):
-        return send_from_directory(os.path.join(app.root_path, '../static/js'), filename)
+        # Démarrage du serveur
+        print(f"🚀 Serveur en cours d'exécution sur http://localhost:{port}/")
+        app.run(host=host, port=port, debug=debug)
 
-    print("🚀 Serveur en cours d'exécution sur http://localhost:5001/")
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    except Exception as e:
+        print(f"❌ Erreur de démarrage de l'application: {str(e)}")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

@@ -1,163 +1,233 @@
+// Exécuté au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-    const createUserForm = document.getElementById('create-user-form');
-    const usersList = document.getElementById('users-list');
-    const errorMessage = document.getElementById('error-message');
-    const logoutButton = document.getElementById('logout-button');
+    checkAdminAuth();
+    loadUsers();
+    setupUserForm();
+});
 
-    // Check if user is admin
-    async function checkAdmin() {
-        const token = getCookie('token');
-        if (!token) {
-            window.location.href = 'login.html';
-            return;
-        }
-
-        try {
-            const response = await fetch('http://localhost:5001/api/v1/auth/profile', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const userData = await response.json();
-                if (!userData.is_admin) {
-                    window.location.href = 'index.html';
-                }
-            } else {
-                window.location.href = 'login.html';
-            }
-        } catch (error) {
-            console.error('Error checking admin status:', error);
-            window.location.href = 'login.html';
-        }
+// Vérifie que l'utilisateur est un admin
+async function checkAdminAuth() {
+    const token = getCookie('token');
+    if (!token) {
+        window.location.href = '/login.html';
+        return;
     }
 
-    // Fetch all users
-    async function fetchUsers() {
-        try {
-            const token = getCookie('token');
-            const response = await fetch('http://localhost:5001/api/v1/admin/users', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                const users = await response.json();
-                displayUsers(users);
-            } else {
-                console.error('Failed to fetch users:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    }
-
-    // Display users in the list
-    function displayUsers(users) {
-        usersList.innerHTML = users.map(user => `
-            <div class="user-card">
-                <div class="user-info">
-                    <h3>${user.first_name} ${user.last_name}</h3>
-                    <p>Email: ${user.email}</p>
-                    <p>Role: ${user.is_admin ? 'Admin' : 'User'}</p>
-                </div>
-                <button class="delete-user-btn" data-id="${user.id}">Delete</button>
-            </div>
-        `).join('');
-
-        // Add event listeners to delete buttons
-        document.querySelectorAll('.delete-user-btn').forEach(button => {
-            button.addEventListener('click', () => deleteUser(button.dataset.id));
+    try {
+        const response = await fetch('/api/v1/auth/profile', {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-    }
+        const userData = await response.json();
 
-    // Create new user
-    async function createUser(userData) {
+        if (!userData.is_admin) {
+            window.location.href = '/';
+        }
+    } catch (error) {
+        console.error('Erreur de vérification admin:', error);
+        window.location.href = '/login.html';
+    }
+}
+
+// Configure le formulaire de création d'utilisateur
+function setupUserForm() {
+    const form = document.getElementById('create-user-form');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = {
+            email: form.email.value,
+            password: form.password.value,
+            first_name: form.firstName.value,
+            last_name: form.lastName.value,
+            is_admin: form.isAdmin.checked
+        };
+
         try {
-            const token = getCookie('token');
-            const response = await fetch('http://localhost:5001/api/v1/admin/users', {
+            const response = await fetch('/api/v1/admin/users', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getCookie('token')}`
                 },
-                body: JSON.stringify(userData)
+                body: JSON.stringify(formData)
             });
 
-            const data = await response.json();
+            const result = await response.json();
 
             if (response.ok) {
-                createUserForm.reset();
-                errorMessage.textContent = '';
-                fetchUsers();  // Refresh the users list
+                showMessage('Utilisateur créé avec succès!', 'success');
+                form.reset();
+                loadUsers();  // Recharge la liste des utilisateurs
             } else {
-                errorMessage.textContent = data.message || 'Failed to create user';
+                showMessage(result.error || 'Erreur lors de la création', 'error');
             }
         } catch (error) {
-            console.error('Error creating user:', error);
-            errorMessage.textContent = 'An error occurred while creating the user';
+            console.error('Erreur:', error);
+            showMessage('Erreur lors de la création de l\'utilisateur', 'error');
         }
+    });
+}
+
+// Charge la liste des utilisateurs
+async function loadUsers() {
+    try {
+        const response = await fetch('/api/v1/admin/users', {
+            headers: {
+                'Authorization': `Bearer ${getCookie('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erreur de chargement des utilisateurs');
+        }
+
+        const users = await response.json();
+        displayUsers(users);
+    } catch (error) {
+        console.error('Erreur:', error);
+        showMessage('Erreur lors du chargement des utilisateurs', 'error');
     }
+}
 
-    // Delete user
-    async function deleteUser(userId) {
-        if (!confirm('Are you sure you want to delete this user?')) {
-            return;
-        }
-
-        try {
-            const token = getCookie('token');
-            const response = await fetch(`http://localhost:5001/api/v1/admin/users/${userId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+// Affiche la liste des utilisateurs
+function displayUsers(users) {
+    const usersList = document.getElementById('users-list');
+    usersList.innerHTML = users.map(user => `
+        <div class="user-card">
+            <div class="user-info">
+                <h3>${sanitizeHTML(user.first_name)} ${sanitizeHTML(user.last_name)}</h3>
+                <p>${sanitizeHTML(user.email)}</p>
+                <p class="user-role">${user.is_admin ? 'Administrateur' : 'Utilisateur'}</p>
+            </div>
+            <div class="user-actions">
+                ${user.is_admin ?
+                    `<button onclick="demoteUser('${user.id}')" class="button warning">
+                        <span class="icon">⬇️</span> Rétrograder
+                    </button>` :
+                    `<button onclick="promoteUser('${user.id}')" class="button success">
+                        <span class="icon">⬆️</span> Promouvoir
+                    </button>`
                 }
-            });
+                <button onclick="deleteUser('${user.id}')" class="button danger">
+                    <span class="icon">🗑️</span> Supprimer
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
 
-            if (response.ok) {
-                fetchUsers();  // Refresh the users list
-            } else {
-                const error = await response.json();
-                alert(error.message || 'Failed to delete user');
+// Promeut un utilisateur en admin
+async function promoteUser(userId) {
+    if (!confirm('Voulez-vous vraiment promouvoir cet utilisateur en administrateur?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/v1/admin/users/${userId}/promote`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${getCookie('token')}`
             }
-        } catch (error) {
-            console.error('Error deleting user:', error);
-            alert('An error occurred while deleting the user');
+        });
+
+        if (response.ok) {
+            showMessage('Utilisateur promu avec succès', 'success');
+            loadUsers();
+        } else {
+            const data = await response.json();
+            showMessage(data.error || 'Erreur lors de la promotion', 'error');
         }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showMessage('Erreur lors de la promotion de l\'utilisateur', 'error');
+    }
+}
+
+// Rétrograde un admin en utilisateur normal
+async function demoteUser(userId) {
+    if (!confirm('Voulez-vous vraiment rétrograder cet administrateur?')) {
+        return;
     }
 
-    // Handle form submission
-    createUserForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const userData = {
-            first_name: document.getElementById('first-name').value,
-            last_name: document.getElementById('last-name').value,
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value,
-            is_admin: document.getElementById('is-admin').checked
-        };
-        createUser(userData);
-    });
+    try {
+        const response = await fetch(`/api/v1/admin/users/${userId}/demote`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${getCookie('token')}`
+            }
+        });
 
-    // Handle logout
-    logoutButton.addEventListener('click', () => {
-        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        window.location.href = 'login.html';
-    });
+        if (response.ok) {
+            showMessage('Utilisateur rétrogradé avec succès', 'success');
+            loadUsers();
+        } else {
+            const data = await response.json();
+            showMessage(data.error || 'Erreur lors de la rétrogradation', 'error');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showMessage('Erreur lors de la rétrogradation de l\'utilisateur', 'error');
+    }
+}
 
-    // Get cookie helper function
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
+// Supprime un utilisateur
+async function deleteUser(userId) {
+    if (!confirm('Voulez-vous vraiment supprimer cet utilisateur?')) {
+        return;
     }
 
-    // Initialize
-    checkAdmin();
-    fetchUsers();
-});
+    try {
+        const response = await fetch(`/api/v1/admin/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${getCookie('token')}`
+            }
+        });
+
+        if (response.ok) {
+            showMessage('Utilisateur supprimé avec succès', 'success');
+            loadUsers();
+        } else {
+            const data = await response.json();
+            showMessage(data.error || 'Erreur lors de la suppression', 'error');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showMessage('Erreur lors de la suppression de l\'utilisateur', 'error');
+    }
+}
+
+// Affiche un message de notification
+function showMessage(message, type = 'info') {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.textContent = message;
+    document.querySelector('main').prepend(messageDiv);
+
+    setTimeout(() => messageDiv.remove(), 5000);
+}
+
+// Récupère un cookie par son nom
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+// Nettoie les chaînes de caractères pour l'affichage HTML
+function sanitizeHTML(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// Déconnexion de l'utilisateur
+function logout() {
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    window.location.href = '/login.html';
+}
