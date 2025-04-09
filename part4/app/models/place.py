@@ -176,6 +176,53 @@ class Place(BaseModel):
             place.save()
 
         return place
+def is_available(self, start_date, end_date):
+    """Vérifie si le logement est disponible pour une période donnée."""
+    from app.models.booking import Booking
+    return not Booking.query.filter(
+        Booking.place_id == self.id,
+        Booking.status == 'confirmed',
+        ((Booking.start_date <= end_date) & (Booking.end_date >= start_date))
+    ).first()
 
-    def __repr__(self):
-        return f"<Place {self.title}>"
+def get_booked_periods(self):
+    """Retourne les périodes où le logement est réservé."""
+    from app.models.booking import Booking
+    return Booking.query.filter(
+        Booking.place_id == self.id,
+        Booking.status == 'confirmed'
+    ).order_by(Booking.start_date).all()
+
+def to_dict(self):
+    """Convert the place instance to a dictionary."""
+    place_dict = super().to_dict()
+
+    # Add booked periods
+    place_dict['booked_periods'] = [{
+        'start_date': booking.start_date.isoformat(),
+        'end_date': booking.end_date.isoformat()
+    } for booking in self.get_booked_periods()]
+
+    # Add owner information
+    if self.owner:
+        place_dict['owner'] = {
+            'id': self.owner.id,
+            'first_name': self.owner.first_name,
+            'last_name': self.owner.last_name,
+            'email': self.owner.email
+        }
+
+    # Add reviews
+    place_dict['reviews'] = [review.to_dict() for review in self.reviews] if self.reviews else []
+
+    # Add photos
+    place_dict['photos'] = [photo.to_dict() for photo in self.photos] if self.photos else []
+
+    # Add amenities
+    place_dict['amenities'] = [amenity.to_dict() for amenity in self.amenities.all()] if self.amenities else []
+
+    return place_dict
+
+def __repr__(self):
+    return f"<Place {self.title}>"
+

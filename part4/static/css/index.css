@@ -38,11 +38,13 @@
 /* Carte d'un lieu */
 .place-card {
     background: white;
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    border-radius: 10px;
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
+    margin: 20px;
+    padding: 10px;
 }
 
 .place-card:hover {
@@ -83,7 +85,7 @@
 
 /* Contenu de la carte */
 .place-card-content {
-    padding: 1rem;
+    padding: 10px;
 }
 
 .place-card-content h3 {

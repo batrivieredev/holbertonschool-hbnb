@@ -57,9 +57,10 @@
 /* Informations du lieu */
 .place-content {
     background: white;
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin: 20px;
 }
 
 .place-content h1 {
@@ -110,27 +111,314 @@
 
 .booking-form {
     background: white;
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin: 20px;
 }
 
 .booking-form .form-group {
     margin-bottom: 1rem;
 }
 
-.booking-form input[type="date"] {
+/* Styles du calendrier */
+.flatpickr-calendar {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: inherit;
+}
+
+.flatpickr-day {
+    border-radius: var(--border-radius);
+}
+
+.flatpickr-day.selected {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.flatpickr-day.disabled {
+    background: #ffebee;
+    color: #d32f2f;
+    text-decoration: line-through;
+    cursor: not-allowed;
+}
+
+.flatpickr-day.inRange {
+    background: #e3f2fd;
+    border-color: #bbdefb;
+    box-shadow: -5px 0 0 #e3f2fd, 5px 0 0 #e3f2fd;
+}
+
+/* Styles du champ de date */
+.booking-form input[type="text"] {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: var(--border-radius);
     font-family: inherit;
+    cursor: pointer;
+    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E") no-repeat right 10px center;
+    background-size: 20px;
+}
+
+.booking-form input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1);
 }
 
 .booking-form textarea {
     width: 100%;
     resize: vertical;
+}
+
+/* Section des périodes réservées et du calendrier */
+.booking-form {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.booked-periods {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Style du calendrier */
+.flatpickr-calendar {
+    font-family: 'Poppins', sans-serif !important;
+    background: #fff !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    border-radius: 8px !important;
+    border: none !important;
+    margin-top: 8px !important;
+}
+
+.flatpickr-day {
+    border-radius: 6px !important;
+    margin: 2px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+}
+
+/* Styles des états du calendrier */
+.flatpickr-day.selected {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.flatpickr-day.selected:hover {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.flatpickr-day.disabled {
+    background-color: #ffebee !important;
+    color: #d32f2f !important;
+    cursor: not-allowed !important;
+    opacity: 0.8 !important;
+    position: relative !important;
+}
+
+.booked-indicator {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 12px;
+    color: #d32f2f;
+}
+
+.flatpickr-day.disabled::after {
+    content: '🚫';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    opacity: 0.5;
+}
+
+.flatpickr-day.inRange {
+    background-color: #e3f2fd !important;
+    border-color: #bbdefb !important;
+    box-shadow: -5px 0 0 #e3f2fd, 5px 0 0 #e3f2fd !important;
+}
+
+.flatpickr-day:not(.disabled):not(.selected):hover {
+    background-color: #f5f5f5 !important;
+    border-color: #e0e0e0 !important;
+}
+
+/* État du jour actuel */
+.flatpickr-day.today {
+    border: 2px solid var(--primary-color) !important;
+    background-color: transparent !important;
+    color: var(--primary-color) !important;
+    font-weight: bold !important;
+}
+
+.flatpickr-day.today:hover {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Style pour les jours sélectionnés */
+.flatpickr-day.selected {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.flatpickr-day.selected:hover {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Style pour les jours dans la plage */
+.flatpickr-day.inRange {
+    background-color: rgba(var(--primary-color-rgb), 0.1) !important;
+    border-color: rgba(var(--primary-color-rgb), 0.2) !important;
+    box-shadow: none !important;
+}
+
+/* État désactivé */
+.flatpickr-day.disabled {
+    color: #d32f2f !important;
+    text-decoration: none !important;
+    position: relative !important;
+    background-color: #ffebee !important;
+}
+
+.flatpickr-day.disabled:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    border-top: 1px solid #d32f2f;
+    transform: rotate(-45deg);
+}
+
+.flatpickr-input {
+    width: 100% !important;
+    padding: 0.75rem !important;
+    border: 1px solid #ddd !important;
+    border-radius: var(--border-radius) !important;
+    font-family: inherit !important;
+    cursor: pointer !important;
+    background: white !important;
+}
+
+.flatpickr-input:focus {
+    outline: none !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.1) !important;
+}
+
+.booked-periods h3 {
+    color: var(--primary-color);
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+}
+
+.booked-periods-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.booked-period {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.booked-period:last-child {
+    margin-bottom: 0;
+}
+
+.booked-period .icon {
+    color: var(--primary-color);
+}
+
+/* Section du total de la réservation */
+.booking-total {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.booking-total p {
+    margin: 0.5rem 0;
+}
+
+.booking-total p:last-child {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+/* État des dates dans le calendrier */
+.flatpickr-day.past-date {
+    background-color: #f5f5f5 !important;
+    color: #999 !important;
+    cursor: not-allowed !important;
+    text-decoration: line-through !important;
+}
+
+.flatpickr-day.booked-date {
+    background-color: #ffebee !important;
+    color: #d32f2f !important;
+    cursor: not-allowed !important;
+}
+
+.flatpickr-day.booked-date::after {
+    content: '●';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: #d32f2f;
+}
+
+.flatpickr-day.available-date {
+    background-color: #ffffff !important;
+    color: #333 !important;
+    cursor: pointer !important;
+}
+
+.flatpickr-day.available-date:hover {
+    background-color: #e8f5e9 !important;
+    color: #2e7d32 !important;
+}
+
+.flatpickr-day.selected {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+.flatpickr-day.inRange {
+    background-color: rgba(var(--primary-color-rgb), 0.1) !important;
+    border-color: rgba(var(--primary-color-rgb), 0.2) !important;
+    box-shadow: none !important;
 }
 
 /* Liste des réservations */
@@ -142,10 +430,10 @@
 
 .booking-card {
     background: white;
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1rem;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin: 20px;
 }
 
 .booking-header {
@@ -183,6 +471,44 @@
     display: flex;
     gap: 1rem;
     margin-top: 1rem;
+}
+
+/* Périodes de réservation */
+.place-bookings {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+}
+
+.place-bookings h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.booked-periods {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.booked-period {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.booked-period:last-child {
+    margin-bottom: 0;
+}
+
+.booked-period .icon {
+    color: var(--primary-color);
 }
 
 /* Équipements */

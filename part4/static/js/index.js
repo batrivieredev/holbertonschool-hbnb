@@ -133,10 +133,13 @@ function renderAmenities(amenities) {
 }
 
 // Filtre par prix
-document.getElementById('price-filter')?.addEventListener('input', (e) => {
+document.getElementById('price-filter')?.addEventListener('change', (e) => {
     const maxPrice = e.target.value;
-    document.getElementById('price-value').textContent = `${maxPrice}€`;
-    loadPlaces(maxPrice);
+    if (maxPrice === 'all') {
+        loadPlaces();
+    } else {
+        loadPlaces(maxPrice);
+    }
 });
 
 // Affiche une erreur

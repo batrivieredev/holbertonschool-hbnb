@@ -10,16 +10,41 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 @places_bp.route('/places', methods=['GET'])
 def get_places():
-    """Get list of places with optional price filter."""
+    """Get list of places with optional filters for price and dates."""
     try:
+        # Récupération des paramètres de filtrage
         max_price = request.args.get('max_price', type=float)
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+
+        # Query de base
         places = Place.query
 
+        # Filtre par prix si spécifié
         if max_price is not None:
             places = places.filter(Place.price <= max_price)
 
-        places = places.all()
-        return jsonify([place.to_dict() for place in places]), 200
+        # Récupération de tous les logements
+        all_places = places.all()
+
+        # Si des dates sont spécifiées, filtrer les logements non disponibles
+        if start_date and end_date:
+            try:
+                from datetime import datetime
+                start = datetime.strptime(start_date, '%Y-%m-%d').date()
+                end = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+                # Filtrer uniquement les logements disponibles pour ces dates
+                available_places = [
+                    place for place in all_places
+                    if place.is_available(start, end)
+                ]
+                return jsonify([place.to_dict() for place in available_places]), 200
+            except ValueError:
+                return jsonify({'error': 'Format de date invalide. Utilisez YYYY-MM-DD'}), 400
+
+        # Sans dates, retourner tous les logements
+        return jsonify([place.to_dict() for place in all_places]), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

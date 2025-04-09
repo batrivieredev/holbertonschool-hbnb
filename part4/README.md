@@ -9,6 +9,11 @@ HBnB est une application web de gestion de locations immobilières, permettant a
 - ⭐ Système d'avis et de notation
 - 🛠️ Interface d'administration
 - 🔍 Recherche et filtrage des logements
+- 📅 Système de réservation
+  - Validation des réservations par le propriétaire
+  - Masquage automatique des logements sur le site pendant leurs périodes de réservation validées
+  - Indication claire des périodes "Réservé du [date] au [date]" sur la page du logement
+  - Gestion des disponibilités en temps réel
 
 ## Installation
 
@@ -79,18 +84,26 @@ Mot de passe: admin12345
 - `GET /api/v1/places/<id>` : Détails d'un logement
 - `PUT /api/v1/places/<id>` : Modification d'un logement
 - `DELETE /api/v1/places/<id>` : Suppression d'un logement
-
 ### Avis
 - `GET /api/v1/places/<id>/reviews` : Avis d'un logement
 - `POST /api/v1/places/<id>/reviews` : Création d'avis
+
+### Réservations
+- `POST /api/v1/places/<id>/bookings` : Demande de réservation
+- `GET /api/v1/places/<id>/bookings` : Liste des réservations d'un logement
+- `PUT /api/v1/bookings/<id>/validate` : Validation d'une réservation par le propriétaire
+- `PUT /api/v1/bookings/<id>/cancel` : Annulation d'une réservation
+- `GET /api/v1/users/bookings` : Liste des réservations de l'utilisateur
+
 
 ## Pages Frontend
 
 - `/` : Page d'accueil avec liste des logements
 - `/login.html` : Page de connexion
 - `/admin.html` : Interface d'administration
-- `/place.html` : Détails d'un logement
+- `/place.html` : Détails d'un logement avec système de réservation
 - `/create-place.html` : Création de logement
+- `/bookings.html` : Gestion des réservations (propriétaire/locataire)
 
 ## Technologies Utilisées
 
