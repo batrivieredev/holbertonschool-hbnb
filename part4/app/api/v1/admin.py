@@ -125,3 +125,24 @@ def demote_user(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/users/<string:user_id>/password', methods=['PUT'])
+@require_admin
+def update_user_password(user_id):
+    """Update a user's password."""
+    try:
+        data = request.get_json()
+        if not data or 'password' not in data:
+            return jsonify({'error': 'No password provided'}), 400
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        user.hash_password(data['password'])
+        db.session.commit()
+
+        return jsonify({'message': 'Password updated successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

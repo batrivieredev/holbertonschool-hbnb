@@ -90,6 +90,18 @@ header {
     background-color: var(--background-color);
 }
 
+.user-name {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    padding: 0.5rem 1rem;
+    margin-right: 0.5rem;
+    font-weight: 500;
+}
+
+.name-text {
+    color: var(--primary-color);
+}
+
 /* Main Content */
 main {
     flex: 1;

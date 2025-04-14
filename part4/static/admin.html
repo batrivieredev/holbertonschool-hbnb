@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
-    <!-- CSS -->
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/admin.css">
 </head>
@@ -16,14 +15,16 @@
     <header>
         <div class="header-content">
             <a href="/" class="logo">
-                <div class="logo-icon">H</div>
-                <span class="logo-text">HBnB</span>
+                <img src="/static/images/icon.png" alt="HBnB Logo" class="logo-img">
             </a>
             <nav class="nav-links">
                 <a href="/" class="nav-link">
                     <span class="icon">🏠</span> Accueil
                 </a>
-                <button id="logout-button" class="nav-link">
+                <span id="user-name" class="nav-link user-name" style="display: none;">
+                    <span class="icon">👤</span> <span class="name-text"></span>
+                </span>
+                <button id="logout-button" class="nav-link" onclick="logout()">
                     <span class="icon">🚪</span> Déconnexion
                 </button>
             </nav>
@@ -65,16 +66,56 @@
 
                     <button type="submit" class="button">
                         <span class="icon">➕</span> Créer l'utilisateur
-                        <span class="loading-spinner" style="display: none;"></span>
                     </button>
                 </form>
             </section>
 
-            <!-- Liste des utilisateurs -->
+            <!-- Gestion unifiée des utilisateurs -->
             <section class="users-section">
-                <h2>Utilisateurs</h2>
-                <div id="users-list" class="users-grid">
-                    <div class="loading">Chargement des utilisateurs...</div>
+                <h2>Gestion des utilisateurs</h2>
+                <div class="users-management">
+                    <div class="form-group">
+                        <label for="userManageSelect">Sélectionner un utilisateur</label>
+                        <select id="userManageSelect" class="user-select">
+                            <option value="">Choisir un utilisateur</option>
+                        </select>
+                    </div>
+
+                    <div id="userManageActions" class="user-actions" style="display: none;">
+                        <!-- Informations utilisateur -->
+                        <div class="user-info-section">
+                            <h3>Informations</h3>
+                            <div id="selectedUserInfo"></div>
+                        </div>
+
+                        <!-- Modification du mot de passe -->
+                        <form id="password-form" class="admin-form">
+                            <h3>Modifier le mot de passe</h3>
+                            <div class="form-group">
+                                <label for="newPassword">Nouveau mot de passe</label>
+                                <input type="password" id="newPassword" required>
+                            </div>
+                            <button type="submit" class="button">
+                                <span class="icon">🔑</span> Modifier le mot de passe
+                            </button>
+                        </form>
+
+                        <!-- Gestion des droits -->
+                        <div class="admin-toggle">
+                            <h3>Droits administrateur</h3>
+                            <div class="form-group checkbox-group">
+                                <input type="checkbox" id="selectedUserAdmin">
+                                <label for="selectedUserAdmin">Administrateur</label>
+                            </div>
+                        </div>
+
+                        <!-- Suppression -->
+                        <div class="delete-section">
+                            <button onclick="deleteSelectedUser()" class="button danger">
+                                <span class="icon">🗑️</span> Supprimer l'utilisateur
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -91,7 +132,6 @@
         </div>
     </footer>
 
-    <!-- JavaScript -->
     <script src="/js/admin.js"></script>
 </body>
 </html>

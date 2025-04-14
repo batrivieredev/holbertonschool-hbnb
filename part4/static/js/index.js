@@ -19,6 +19,20 @@ function checkAuth() {
             logoutButton.addEventListener('click', logout);
         }
 
+        // Afficher le nom de l'utilisateur
+        fetch('/api/v1/auth/profile', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(response => response.json())
+        .then(userData => {
+            const userName = document.getElementById('user-name');
+            if (userName) {
+                userName.style.display = 'inline-flex';
+                userName.querySelector('.name-text').textContent =
+                    `${userData.first_name} ${userData.last_name}`;
+            }
+        });
+
         // Vérifie si l'utilisateur est admin
         fetch('/api/v1/auth/profile', {
             headers: { 'Authorization': `Bearer ${token}` }

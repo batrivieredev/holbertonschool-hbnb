@@ -34,6 +34,14 @@ function checkAuth() {
             })
             .then(response => response.json())
             .then(data => {
+                // Afficher le nom de l'utilisateur
+                const userName = document.getElementById('user-name');
+                if (userName) {
+                    userName.style.display = 'inline-flex';
+                    userName.querySelector('.name-text').textContent =
+                        `${data.first_name} ${data.last_name}`;
+                }
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const placeId = urlParams.get('id');
                 loadPlace(placeId, data.id, reviewForm, bookingSection);
@@ -337,15 +345,8 @@ function initBookingForm(placeId, place, confirmedBookings = []) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            // Colorize calendar days based on status
             const currentDate = new Date(dObj);
             currentDate.setHours(0, 0, 0, 0);
-
-            if (currentDate < today) {
-                dayElem.classList.add('past-date');
-                dayElem.title = 'Date passée';
-                return;
-            }
 
             const isBooked = bookedRanges.some(range =>
                 currentDate >= range.start && currentDate <= range.end
@@ -353,11 +354,7 @@ function initBookingForm(placeId, place, confirmedBookings = []) {
 
             if (isBooked) {
                 dayElem.classList.add('booked-date');
-                dayElem.title = 'Déjà réservé';
                 dayElem.innerHTML += '<span class="booked-indicator">•</span>';
-            } else {
-                dayElem.classList.add('available-date');
-                dayElem.title = 'Disponible';
             }
         },
         onChange: function(selectedDates) {

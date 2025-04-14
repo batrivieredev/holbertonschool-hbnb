@@ -3,7 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     checkAdminAuth();
     loadUsers();
     setupUserForm();
+    setupUserManagement();
 });
+
+// Variables globales pour stocker les données des utilisateurs
+let usersData = [];
 
 // Vérifie que l'utilisateur est un admin
 async function checkAdminAuth() {
@@ -57,13 +61,61 @@ function setupUserForm() {
             if (response.ok) {
                 showMessage('Utilisateur créé avec succès!', 'success');
                 form.reset();
-                loadUsers();  // Recharge la liste des utilisateurs
+                loadUsers();
             } else {
                 showMessage(result.error || 'Erreur lors de la création', 'error');
             }
         } catch (error) {
             console.error('Erreur:', error);
             showMessage('Erreur lors de la création de l\'utilisateur', 'error');
+        }
+    });
+}
+
+// Configure la gestion des utilisateurs
+function setupUserManagement() {
+    const userSelect = document.getElementById('userManageSelect');
+    const actionsDiv = document.getElementById('userManageActions');
+    const passwordForm = document.getElementById('password-form');
+    const adminCheckbox = document.getElementById('selectedUserAdmin');
+
+    // Gestionnaire de changement d'utilisateur
+    userSelect.addEventListener('change', () => {
+        const userId = userSelect.value;
+        if (userId) {
+            const selectedUser = usersData.find(user => user.id === userId);
+            if (selectedUser) {
+                displayUserDetails(selectedUser);
+                actionsDiv.style.display = 'block';
+            }
+        } else {
+            actionsDiv.style.display = 'none';
+        }
+    });
+
+    // Gestionnaire du formulaire de mot de passe
+    passwordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = userSelect.value;
+        const newPassword = document.getElementById('newPassword').value;
+
+        if (!userId || !newPassword) {
+            showMessage('Veuillez sélectionner un utilisateur et saisir un mot de passe', 'error');
+            return;
+        }
+
+        await updateUserPassword(userId, newPassword);
+    });
+
+    // Gestionnaire du changement de statut admin
+    adminCheckbox.addEventListener('change', async () => {
+        const userId = userSelect.value;
+        if (userId) {
+            if (adminCheckbox.checked) {
+                await promoteUser(userId);
+            } else {
+                await demoteUser(userId);
+            }
         }
     });
 }
@@ -81,44 +133,69 @@ async function loadUsers() {
             throw new Error('Erreur de chargement des utilisateurs');
         }
 
-        const users = await response.json();
-        displayUsers(users);
+        usersData = await response.json();
+        updateUserSelect(usersData);
     } catch (error) {
         console.error('Erreur:', error);
         showMessage('Erreur lors du chargement des utilisateurs', 'error');
     }
 }
 
-// Affiche la liste des utilisateurs
-function displayUsers(users) {
-    const usersList = document.getElementById('users-list');
-    usersList.innerHTML = users.map(user => `
-        <div class="user-card">
-            <div class="user-info">
-                <h3>${sanitizeHTML(user.first_name)} ${sanitizeHTML(user.last_name)}</h3>
-                <p>${sanitizeHTML(user.email)}</p>
-                <p class="user-role">${user.is_admin ? 'Administrateur' : 'Utilisateur'}</p>
-            </div>
-            <div class="user-actions">
-                ${user.is_admin ?
-                    `<button onclick="demoteUser('${user.id}')" class="button warning">
-                        <span class="icon">⬇️</span> Rétrograder
-                    </button>` :
-                    `<button onclick="promoteUser('${user.id}')" class="button success">
-                        <span class="icon">⬆️</span> Promouvoir
-                    </button>`
-                }
-                <button onclick="deleteUser('${user.id}')" class="button danger">
-                    <span class="icon">🗑️</span> Supprimer
-                </button>
-            </div>
-        </div>
-    `).join('');
+// Met à jour le menu déroulant des utilisateurs
+function updateUserSelect(users) {
+    const userSelect = document.getElementById('userManageSelect');
+
+    userSelect.innerHTML = `
+        <option value="">Choisir un utilisateur</option>
+        ${users.map(user => `
+            <option value="${user.id}">
+                ${sanitizeHTML(user.first_name)} ${sanitizeHTML(user.last_name)} (${sanitizeHTML(user.email)})
+            </option>
+        `).join('')}
+    `;
+}
+
+// Affiche les détails de l'utilisateur sélectionné
+function displayUserDetails(user) {
+    const infoDiv = document.getElementById('selectedUserInfo');
+    infoDiv.innerHTML = `
+        <p><strong>Nom complet :</strong> ${sanitizeHTML(user.first_name)} ${sanitizeHTML(user.last_name)}</p>
+        <p><strong>Email :</strong> ${sanitizeHTML(user.email)}</p>
+        <p><strong>Statut :</strong> ${user.is_admin ? 'Administrateur' : 'Utilisateur'}</p>
+    `;
+
+    document.getElementById('selectedUserAdmin').checked = user.is_admin;
+}
+
+// Met à jour le mot de passe d'un utilisateur
+async function updateUserPassword(userId, newPassword) {
+    try {
+        const response = await fetch(`/api/v1/admin/users/${userId}/password`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getCookie('token')}`
+            },
+            body: JSON.stringify({ password: newPassword })
+        });
+
+        if (response.ok) {
+            showMessage('Mot de passe modifié avec succès', 'success');
+            document.getElementById('password-form').reset();
+        } else {
+            const data = await response.json();
+            showMessage(data.error || 'Erreur lors de la modification du mot de passe', 'error');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showMessage('Erreur lors de la modification du mot de passe', 'error');
+    }
 }
 
 // Promeut un utilisateur en admin
 async function promoteUser(userId) {
     if (!confirm('Voulez-vous vraiment promouvoir cet utilisateur en administrateur?')) {
+        document.getElementById('selectedUserAdmin').checked = false;
         return;
     }
 
@@ -136,16 +213,19 @@ async function promoteUser(userId) {
         } else {
             const data = await response.json();
             showMessage(data.error || 'Erreur lors de la promotion', 'error');
+            document.getElementById('selectedUserAdmin').checked = false;
         }
     } catch (error) {
         console.error('Erreur:', error);
         showMessage('Erreur lors de la promotion de l\'utilisateur', 'error');
+        document.getElementById('selectedUserAdmin').checked = false;
     }
 }
 
 // Rétrograde un admin en utilisateur normal
 async function demoteUser(userId) {
     if (!confirm('Voulez-vous vraiment rétrograder cet administrateur?')) {
+        document.getElementById('selectedUserAdmin').checked = true;
         return;
     }
 
@@ -163,19 +243,29 @@ async function demoteUser(userId) {
         } else {
             const data = await response.json();
             showMessage(data.error || 'Erreur lors de la rétrogradation', 'error');
+            document.getElementById('selectedUserAdmin').checked = true;
         }
     } catch (error) {
         console.error('Erreur:', error);
         showMessage('Erreur lors de la rétrogradation de l\'utilisateur', 'error');
+        document.getElementById('selectedUserAdmin').checked = true;
     }
 }
 
-// Supprime un utilisateur
-async function deleteUser(userId) {
+// Supprime l'utilisateur sélectionné
+function deleteSelectedUser() {
+    const userId = document.getElementById('userManageSelect').value;
+    if (!userId) return;
+
     if (!confirm('Voulez-vous vraiment supprimer cet utilisateur?')) {
         return;
     }
 
+    deleteUser(userId);
+}
+
+// Supprime un utilisateur
+async function deleteUser(userId) {
     try {
         const response = await fetch(`/api/v1/admin/users/${userId}`, {
             method: 'DELETE',
@@ -186,6 +276,7 @@ async function deleteUser(userId) {
 
         if (response.ok) {
             showMessage('Utilisateur supprimé avec succès', 'success');
+            document.getElementById('userManageActions').style.display = 'none';
             loadUsers();
         } else {
             const data = await response.json();
@@ -226,7 +317,7 @@ function sanitizeHTML(str) {
         .replace(/'/g, '&#039;');
 }
 
-// Déconnexion de l'utilisateur
+// Déconnexion
 function logout() {
     document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     window.location.href = '/login.html';

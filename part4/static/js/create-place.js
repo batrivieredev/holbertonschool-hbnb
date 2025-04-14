@@ -12,6 +12,24 @@ async function checkAuth() {
         window.location.href = '/login.html';
         return;
     }
+
+    try {
+        const response = await fetch('/api/v1/auth/profile', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const userData = await response.json();
+
+        // Afficher le nom de l'utilisateur
+        const userName = document.getElementById('user-name');
+        if (userName) {
+            userName.style.display = 'inline-flex';
+            userName.querySelector('.name-text').textContent =
+                `${userData.first_name} ${userData.last_name}`;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        window.location.href = '/login.html';
+    }
 }
 
 // Charge la liste des équipements disponibles
@@ -151,13 +169,21 @@ document.getElementById('create-place-form').addEventListener('submit', async (e
         // Vérifie si au moins une photo est fournie
         const photos = getPhotos();
         const amenities = getSelectedAmenities();
+        const latitude = parseFloat(document.getElementById('latitude').value);
+        const longitude = parseFloat(document.getElementById('longitude').value);
+
+        // Récupère l'adresse à partir des coordonnées
+        const locationResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+        const locationData = await locationResponse.json();
+        const location = locationData.display_name || 'Adresse non trouvée';
 
         // Crée l'objet avec les données du formulaire
         const formData = {
             title: document.getElementById('title').value,
             description: document.getElementById('description').value,
-            latitude: parseFloat(document.getElementById('latitude').value),
-            longitude: parseFloat(document.getElementById('longitude').value),
+            latitude: latitude,
+            longitude: longitude,
+            location: location,
             price: parseInt(document.getElementById('price').value),
             amenities: amenities,
             photos: photos
